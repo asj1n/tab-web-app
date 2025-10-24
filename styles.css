@@ -1,0 +1,344 @@
+html,
+body {
+  text-align: center;
+  background: url("assets/background.png");
+  background-attachment: fixed;
+  background-size: cover;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  color: white;
+
+  font-family: "JetBrains Mono", monospace;
+  font-optical-sizing: auto;
+  font-weight: normal;
+  font-style: normal;
+}
+
+hr {
+  background-color: 1px solid white;
+}
+
+button {
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 15px;
+  text-align: center;
+  width: 120px;
+  height: 35px;
+  background: linear-gradient(
+    to bottom,
+    #ffffff 0%,
+    #f1f1f1 50%,
+    #e1e1e1 51%,
+    #f6f6f6 100%
+  );
+  color: black;
+  border-color: grey;
+  border-width: 1px;
+  border-radius: 5px;
+  margin: 10px;
+
+  font-family: "JetBrains Mono", monospace;
+  font-optical-sizing: none;
+  font-weight: bolder;
+  font-style: normal;
+  font-size: smaller;
+}
+
+.screen-size {
+  width: 100%;
+  height: 75%;
+  display: none;
+  overflow: auto;
+}
+
+#header {
+  height: 25%;
+  width: 100%;
+  border-bottom: 3px solid white;
+  background: rgba(0, 0, 0, 0.4);
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+#playScreen {
+  margin: 0;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+
+#messages {
+  width: 20%;
+  display: flex;
+  flex-direction: column;
+}
+
+#messagesTitle {
+  height: 15%;
+  border-bottom: 2px solid white;
+  display: flex;          
+  justify-content: center;
+  align-items: center;
+  font-size: x-large;
+  font-weight: bolder;
+}
+
+#messagesList {
+  margin: 0;
+  padding: 10px;
+  list-style-type: decimal;
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+
+#messagesList li {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  word-wrap: break-word;
+}
+
+#messagesList li.new-message {
+  background-color: #ffcc00;
+  font-weight: bold;
+  color: black;
+}
+
+#messagesContent {
+  height: 80%;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+}
+
+#mainArea {
+  flex: 1; /* takes up all leftover space */
+  height: 100%;
+  border-left: 2px solid white;
+  border-right: 2px solid white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; 
+}
+
+.dice {
+  width: 9%;
+  height: 40%;
+  margin: 5%;
+  border: 2px solid black;
+  border-radius: 7px;
+  display: flex;
+}
+
+
+#diceArea {
+  width: 20%;
+  right: 0;
+}
+
+#diceTitle {
+  height: 15%;
+  border-bottom: 2px solid white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: x-large;
+  font-weight: bolder;
+}
+
+#diceContent {
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 25px
+}
+
+#diceValue {
+  border: 2px solid white;
+  border-radius: 15px;
+  width: 50%;
+  height: 15%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: larger;
+}
+
+#dices {
+  width: 100%;
+  height: 40%;
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+}
+
+#dice1 {
+  background-color: rgb(49, 26, 2);
+  height: 100%;
+}
+
+#dice2 {
+  background-color: rgb(49, 26, 2);
+  height: 100%;
+}
+
+#dice3 {
+  background-color: rgb(49, 26, 2);
+  height: 100%;
+}
+
+#dice4 {
+  background-color: rgb(49, 26, 2);
+  height: 100%;
+}
+
+#diceValueName{
+  height: 5%;
+  width: 100%;
+  margin: 10px;
+  align-content: center;
+  font-size: medium;
+}
+
+
+#settingsScreen {
+  margin: 0;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+}
+
+
+#standingsScreen {
+  margin: 0;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+}
+
+#rulesScreen {
+  margin: 0;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+}
+
+#loginScreen {
+  margin: 0;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+}
+
+#rollButton {
+  width: 80%;
+  height: 15%;
+  font-size: large;
+}
+
+#forfeitButton {
+  width: 23%;
+  height: 80%;
+  font-size: large;
+  margin-right: 15%;
+}
+
+#passTurnButton {
+  width: 23%;
+  height: 75%;
+  font-size: large;
+  margin-left: 15%;
+}
+
+
+
+h4 {
+  margin-bottom: 10px;
+}
+
+.inputField {
+  width: 80%;
+  border-radius: 5px;
+}
+
+#standingsScoreColumn {
+  float: right;
+}
+
+#standingsUserColumn {
+  text-align: left;
+}
+
+#rulesBox {
+	margin: auto;
+  margin-top: 25px;
+	width: 60%;
+	height: auto;
+	text-align: center;
+	background: rgba(0,0,0,0.4);
+	padding: 40px;
+  padding-top: 10px;
+	border: 3px solid white;
+	border-radius: 20px;
+}
+
+#loginBox {
+	margin: auto;
+	text-align: center;
+	width: 15%;
+	height: auto;
+	background: rgba(0,0,0,0.4);
+	padding: 40px;
+	padding-top: 10px;
+	border: 3px solid white;
+	border-radius: 20px;
+}
+
+#standingsBox {
+	margin: auto;
+	text-align: left;
+	width: 15%;
+	height: auto;
+	background: rgba(0,0,0,0.4);
+	padding: 40px;
+	padding-top: 10px;
+	border: 3px solid white;
+	border-radius: 20px;
+}
+
+#settingsBox {
+	margin: auto;
+	text-align: center;
+	width: 40%;
+	height: auto;
+	background: rgba(0,0,0,0.4);
+	padding: 40px;
+	padding-top: 10px;
+	border: 3px solid white;
+	border-radius: 20px;
+}
+
+#board {
+  border: 3px solid white;
+  height: 75%;
+  width: 70%;
+  margin-top: 5%;
+  margin-bottom: 2%;
+  background: rgba(0, 0, 0, 0.4);
+  align-content: center;
+}
+
+#boardAreaButtons {
+  height: 18%;
+  width: 100%;
+  margin-bottom: 3%;
+}
