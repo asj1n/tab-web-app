@@ -34,7 +34,7 @@
             <div id = "boardArea"> 
                 <div id = "board"> Board Area Coming Soon!</div>
 
-                <div id = "boardAreaButtons">  
+                <div id = "boardButtonsArea">  
                     <button id = "forfeitButton" onclick = "forfeit();"> Forfeit </button>
                     <button id = "passTurnButton" onclick = "passTurn();"> Pass Turn </button>
                 </div>
@@ -61,7 +61,7 @@
         </div>
 
         <div id = "settingsScreen" class = "screenSize">
-            <div id = "settingsBox">
+            <div id = "settingsBox" class = "box">
                 <h1> SETTINGS </h1>
                 
                 <hr>    
@@ -82,8 +82,8 @@
                 
                 <div>
                     <h4> Who rolls the dice first? </h4>
-                    AI <input type = "radio" name = "whoFirst" id = "aiFirstRadioButton" value = "0">&#9;
-                    PLAYER 1 <input type = "radio" name = "whoFirst" id = "playerFirstRadioButton" value = "1" checked = "checked">
+                    AI <input id = "aiFirstRadioButton" type = "radio" name = "whoFirst" value = "0">&#9;
+                    PLAYER 1 <input id = "playerFirstRadioButton" type = "radio" name = "whoFirst" value = "1" checked = "checked">
                 </div>
                 
                 <hr>
@@ -110,30 +110,30 @@
         </div>        
 
         <div id = "standingsScreen" class = "screenSize">
-            <div id = "standingsBox">
+            <div id = "standingsBox" class = "box">
                 <h1 style = "text-align: center;"> STANDINGS </h1>
 
                 <hr>
                 
-                <p class = "standingsUserColumn">
+                <p style = "text-align: left;">
                     <b> USER </b>
-                    <span id = "standingsWinColumn">
+                    <span style = "float: right;">
                         <b> WINS </b>
                     </span>
                 </p>
                 
                 <hr>
                 
-                <p class = "standingsUserColumn">
+                <p style = "text-align: left;">
                     PLAYER 1
-                    <span id = "standingsWinColumn">
+                    <span style = "float: right;">
                         <span id = "player1"></span>
                     </span>
                 </p>
                 
-                <p class = "standingsUserColumn">
+                <p style = "text-align: left;">
                     AI
-                    <span id = "standingsWinColumn">
+                    <span style = "float: right;">
                         <span id = "ai"></span>
                     </span>
                 </p>
@@ -141,7 +141,7 @@
         </div>
          
         <div id = "rulesScreen" class = "screenSize">
-            <div id = "rulesBox">
+            <div id = "rulesBox" class = "box">
                 <h1>GAME RULES</h1>
                 
                 <hr>
@@ -173,7 +173,7 @@
         </div>
 
         <div id = "loginScreen" class = "screenSize">
-            <div id = "loginBox">
+            <div id = "loginBox" class = "box">
                 <h1> LOGIN </h1>
                 
                 <hr>
