@@ -29,11 +29,11 @@ function rollDice() {
 
     if (value == 0) { value = 6; }
 
-    let updateValueDisplay = document.getElementById("diceValue");
+    let updateValueDisplay = document.getElementById("diceCombinationValue");
     updateValueDisplay.textContent = value;
-    let updatePlayName = document.getElementById("diceValueName");
+    let updatePlayName = document.getElementById("diceCombinationValueName");
     updatePlayName.textContent = diceValueName(value);
-    console.log(total);
+    console.log(value);
 }
 
 function diceValueName(value) {

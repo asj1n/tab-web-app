@@ -27,16 +27,10 @@ button {
   text-align: center;
   width: 120px;
   height: 35px;
-  background: linear-gradient(
-    to bottom,
-    #ffffff 0%,
-    #f1f1f1 50%,
-    #e1e1e1 51%,
-    #f6f6f6 100%
-  );
+  background: linear-gradient(to bottom, #FFFFFF 0%, #F1F1F1 50%, #E1E1E1 51%, #F6F6F6 100%);
   color: black;
   border-color: grey;
-  border-width: 1px;
+  border-width: 2px;
   border-radius: 5px;
   margin: 10px;
 
@@ -47,7 +41,12 @@ button {
   font-size: smaller;
 }
 
-.screen-size {
+button:hover {
+  background: linear-gradient(to bottom, #F9D862 0%, #FAB549 50%, #F79A3A 51%, #F8842D 100%);
+  border-color: orange;
+}
+
+.screenSize {
   width: 100%;
   height: 75%;
   display: none;
@@ -73,7 +72,7 @@ button {
 }
 
 
-#messages {
+#messagesArea {
   width: 20%;
   display: flex;
   flex-direction: column;
@@ -118,7 +117,7 @@ button {
   overflow: auto;
 }
 
-#mainArea {
+#boardArea {
   flex: 1; /* takes up all leftover space */
   height: 100%;
   border-left: 2px solid white;
@@ -162,7 +161,7 @@ button {
   margin: 25px
 }
 
-#diceValue {
+#diceCombinationValue {
   border: 2px solid white;
   border-radius: 15px;
   width: 50%;
@@ -201,7 +200,7 @@ button {
   height: 100%;
 }
 
-#diceValueName{
+#diceCombinationValueName {
   height: 5%;
   width: 100%;
   margin: 10px;
@@ -239,7 +238,7 @@ button {
   justify-content: center;
 }
 
-#rollButton {
+#rollDiceButton {
   width: 80%;
   height: 15%;
   font-size: large;
@@ -270,7 +269,7 @@ h4 {
   border-radius: 5px;
 }
 
-#standingsScoreColumn {
+#standingsWinColumn {
   float: right;
 }
 
