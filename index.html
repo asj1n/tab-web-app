@@ -22,124 +22,27 @@
             </div>
         </div> 
         
-        <div id = "playScreen" class = "screenSize">
-            <div id = "messagesArea">
-                <div id = "messagesTitle"> MESSAGES </div>
-
-                <ol id = "messagesList"></ol>
+        <div id = "loginScreen" class = "screenSize">
+            <div id = "loginBox" class = "box">
+                <h1> LOGIN </h1>
                 
-                <button onclick = "addNewMessage()" style = "width: 100%; margin: 0px"> Add new message - test button </button>
-            </div>
+                <hr>
 
-            <div id = "boardArea"> 
-                <div id = "board"> Board Area Coming Soon!</div>
-
-                <div id = "boardButtonsArea">  
-                    <button id = "forfeitButton" onclick = "forfeit();"> Forfeit </button>
-                    <button id = "passTurnButton" onclick = "passTurn();"> Pass Turn </button>
-                </div>
-            </div>
-
-            <div id = "diceArea">
-                <div id = "diceTitle">DICE</div>
+                <h4> Username </h4>
+                <input id = "usernameInput" class = "inputField" type = "text">
                 
-                <div id = "diceContent">
-                    <div id = "diceCombinationValue"></div>
+                <br>
 
-                    <div id = "dices">
-                        <div class = "dice" id = "dice1"></div>
-                        <div class = "dice" id = "dice2"></div>
-                        <div class = "dice" id = "dice3"></div>
-                        <div class = "dice" id = "dice4"></div>
-                    </div>
-
-                    <div id = "diceCombinationValueName"></div>
-
-                    <button id = "rollDiceButton" onclick = "rollDice();"> Roll Dice </button>
-                </div>
+                <h4> Password </h4>
+                <input id = "passwordInput" class = "inputField" type = "password">
+                
+                <br>
+                <hr style = "margin-top: 30px; margin-bottom: 30px;">
+                
+                <button id = "login" onclick = "login();"> Sign In </button>
             </div>
         </div>
 
-        <div id = "settingsScreen" class = "screenSize">
-            <div id = "settingsBox" class = "box">
-                <h1> SETTINGS </h1>
-                
-                <hr>    
-                
-                <div>
-                    <h4> Board size </h4>
-                    COLUMNS:&#9;
-                    <select id = "columnSelector" name = "boardColumnsSelector" style = "width: 40px;">
-                        <option value = "7"> 7 </option>
-                        <option value = "9"> 9 </option>
-                        <option value = "11"> 11 </option>
-                        <option value = "13"> 13 </option>
-                        <option value = "15"> 15 </option>
-                    </select>
-                </div>
-
-                <hr>
-                
-                <div>
-                    <h4> Who rolls the dice first? </h4>
-                    AI <input id = "aiFirstRadioButton" type = "radio" name = "whoFirst" value = "0">&#9;
-                    PLAYER 1 <input id = "playerFirstRadioButton" type = "radio" name = "whoFirst" value = "1" checked = "checked">
-                </div>
-                
-                <hr>
-
-                <div>
-                    <h4> Choose your oponent (Only AI implemented) </h4>
-                    AI <input type = "radio" name = "vs" value = "0" checked = "checked">&#9;
-                    <s> PLAYER 2 </s><input type = "radio" name = "vs" value = "1" disabled>        
-                </div>
-
-                <hr>
-
-                <div>
-                    <h4> AI level (Not implemented) </h4>
-                    EASY <input type = "radio" name = "aiLevel" value = "1" checked = "checked">&#9;
-                    <s> MEDIUM </s> <input type = "radio" name = "aiLevel" value = "2" disabled>&#9;
-                    <s> HARD </s> <input type = "radio" name = "aiLevel" value = "3" disabled>
-                </div>
-                
-                <hr>
-
-                <button onclick = "saveSettings();" style = "margin-top: 20px;"> Save </button>
-            </div>
-        </div>        
-
-        <div id = "standingsScreen" class = "screenSize">
-            <div id = "standingsBox" class = "box">
-                <h1 style = "text-align: center;"> STANDINGS </h1>
-
-                <hr>
-                
-                <p style = "text-align: left;">
-                    <b> USER </b>
-                    <span style = "float: right;">
-                        <b> WINS </b>
-                    </span>
-                </p>
-                
-                <hr>
-                
-                <p style = "text-align: left;">
-                    PLAYER 1
-                    <span style = "float: right;">
-                        <span id = "player1"></span>
-                    </span>
-                </p>
-                
-                <p style = "text-align: left;">
-                    AI
-                    <span style = "float: right;">
-                        <span id = "ai"></span>
-                    </span>
-                </p>
-            </div>
-        </div>
-         
         <div id = "rulesScreen" class = "screenSize">
             <div id = "rulesBox" class = "box">
                 <h1>GAME RULES</h1>
@@ -172,27 +75,134 @@
             </div>
         </div>
 
-        <div id = "loginScreen" class = "screenSize">
-            <div id = "loginBox" class = "box">
-                <h1> LOGIN </h1>
+        <div id = "playScreen" class = "screenSize">
+            <div id = "messagesArea">
+                <div id = "messagesTitle"> MESSAGES </div>
+
+                <ol id = "messagesList"></ol>
+                
+                <button onclick = "addNewMessage()" style = "width: 100%; margin: 0px; flex: 0 0 auto;"> Add new message - test button </button>
+            </div>
+
+            <div id = "boardArea"> 
+                <div id = "boardContainer"></div>
+
+                <div id = "boardButtonsArea">  
+                    <button id = "forfeitButton" onclick = "forfeit();"> Forfeit </button>
+                    <button id = "passTurnButton" onclick = "passTurn();"> Pass Turn </button>
+                </div>
+            </div>
+
+            <div id = "diceArea">
+                <div id = "diceTitle">DICE</div>
+                
+                <div id = "diceContent">
+                    <div id = "diceCombinationValue"></div>
+
+                    <div id = "dices">
+                        <div class = "dice" id = "dice1"></div>
+                        <div class = "dice" id = "dice2"></div>
+                        <div class = "dice" id = "dice3"></div>
+                        <div class = "dice" id = "dice4"></div>
+                    </div>
+
+                    <div id = "diceCombinationValueName"></div>
+
+                    <button id = "rollDiceButton" onclick = "rollDice();"> Roll Dice </button>
+                </div>
+            </div>
+        </div>
+
+        <div id = "standingsScreen" class = "screenSize">
+            <div id = "standingsBox" class = "box">
+                <h1 style = "text-align: center;"> STANDINGS </h1>
+
+                <hr>
+                
+                <p style = "text-align: left;">
+                    <b> USER </b>
+                    <span style = "float: right;">
+                        <b> WINS </b>
+                    </span>
+                </p>
+                
+                <hr>
+                
+                <p style = "text-align: left;">
+                    PLAYER 1
+                    <span style = "float: right;">
+                        <span id = "player1"></span>
+                    </span>
+                </p>
+                
+                <p style = "text-align: left;">
+                    AI
+                    <span style = "float: right;">
+                        <span id = "ai"></span>
+                    </span>
+                </p>
+
+                <s>
+                    <p style = "text-align: left;">
+                        PLAYER2
+                        <span style = "float: right;">
+                            <span id = "player2"></span>
+                        </span>
+                    </p>
+                </s>
+            </div>
+        </div>
+
+        <div id = "settingsScreen" class = "screenSize">
+            <div id = "settingsBox" class = "box">
+                <h1> SETTINGS </h1>
+                
+                <hr>    
+                
+                <div>
+                    <h4> Board size </h4>
+                    COLUMNS:&#9;
+                    <select id = "columnSelector" name = "boardColumnsSelector" style = "width: 40px;">
+                        <option value = "7"> 7 </option>
+                        <option value = "9"> 9 </option>
+                        <option value = "11"> 11 </option>
+                        <option value = "13"> 13 </option>
+                        <option value = "15"> 15 </option>
+                    </select>
+                </div>
+
+                <hr>
+
+                <div>
+                    <h4> Choose your oponent (Only AI implemented) </h4>
+                    AI <input type = "radio" name = "vs" value = "AI" checked = "checked">&#9;
+                    <s> PLAYER 2 </s><input type = "radio" name = "vs" value = "Player2" disabled>        
+                </div>                
+
+                <hr>
+
+                <div>
+                    <h4> Who rolls the dice first? </h4>
+                    PLAYER 1 <input type = "radio" name = "whoFirst" value = "Player1" checked = "checked">&#9;
+                    AI <input type = "radio" name = "whoFirst" value = "AI">
+                    <s> PLAYER 2 </s><input type = "radio" name = "whoFirst" value = "Player2" disabled>
+                </div>
+
+                <hr>
+
+                <div>
+                    <h4> AI level (Not implemented) </h4>
+                    EASY <input type = "radio" name = "aiLevel" value = "Easy" checked = "checked">&#9;
+                    <s> MEDIUM </s> <input type = "radio" name = "aiLevel" value = "Medium" disabled>&#9;
+                    <s> HARD </s> <input type = "radio" name = "aiLevel" value = "Hard" disabled>
+                </div>
                 
                 <hr>
 
-                <h4> Username </h4>
-                <input id = "usernameInput" class = "inputField" type = "text">
-                
-                <br>
-
-                <h4> Password </h4>
-                <input id = "passwordInput" class = "inputField" type = "password">
-                
-                <br>
-                <hr style = "margin-top: 30px; margin-bottom: 30px;">
-                
-                <button id = "login" onclick = "login();"> Sign In </button>
+                <button onclick = "saveSettings();" style = "margin-top: 20px;"> Save </button>
             </div>
-        </div>
-        
+        </div>        
+    
         <script src = "script.js"></script>
     </body>
 </html>

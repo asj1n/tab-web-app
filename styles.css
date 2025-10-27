@@ -67,6 +67,49 @@ h4 {
   overflow: auto;
 }
 
+.box {
+  margin: auto;
+  height: auto;
+  text-align: center;
+  background: rgba(0,0,0,0.4);
+  padding: 40px;
+	padding-top: 10px;
+	border: 3px solid white;
+	border-radius: 20px;
+}
+
+.inputField {
+  width: 80%;
+  height: 20px;
+  border-radius: 5px;
+  font-family: "JetBrains Mono", monospace;
+  font-optical-sizing: auto;
+  font-weight: normal;
+}
+
+#loginScreen {
+  margin: 0;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+}
+
+#loginBox {
+	width: 15%;
+}
+
+#rulesScreen {
+  margin: 0;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+}
+
+#rulesBox {
+  margin-top: 25px;
+	width: 60%;	
+}
+
 #playScreen {
   margin: 0;
   text-align: center;
@@ -85,11 +128,13 @@ h4 {
 #messagesTitle {
   height: 15%;
   border-bottom: 2px solid;
-  display: flex;          
+  display: flex; 
+  flex: 0 0 auto;         
   justify-content: center;
   align-items: center;
   font-size: x-large;
   font-weight: bolder;
+  background: rgba(0, 0, 0, 0.4);
 }
 
 #messagesList {
@@ -97,7 +142,9 @@ h4 {
   padding: 10px;
   list-style-type: decimal;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   flex: 1 1 auto;
+  background: rgba(0, 0, 0, 0.1);
 }
 
 #messagesList li {
@@ -107,7 +154,7 @@ h4 {
 }
 
 #messagesList li.new-message {
-  background-color: #ffcc00;
+  background-color: #eae9e1;
   font-weight: bold;
   color: black;
 }
@@ -122,20 +169,49 @@ h4 {
   align-items: center; 
 }
 
-#board {
-  border: 3px solid white;
-  height: 75%;
-  width: 70%;
-  margin-top: 5%;
-  margin-bottom: 2%;
-  background: rgba(0, 0, 0, 0.4);
-  align-content: center;
+#boardContainer {
+  display: grid;
+  gap: 5px;
+  margin: 20px;
+  background: linear-gradient(to bottom, #F9D862 25%, #FAB549 50%, #F79A3A 75%, #F8842D 100%);
+  padding: 15px;
+  border-radius: 10px;
+  border: 3px solid orange;
 }
+
+.cellBox {
+  /* position: relative; */
+  /* color: rgb(190, 129, 94); */
+  background-color: rgb(128, 59, 10);
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+}
+
+.cellPiece {
+  position: absolute;
+  transition: none;
+  width: 45px;
+  height: 45px;
+  border: 3px dotted rgb(190, 129, 94);
+  border-radius: 50%;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* .cellPiece:hover {
+  transition: transform 0.15s ease, background 0.15s ease;
+  transform: scale(1.08);
+} */
 
 #boardButtonsArea {
   height: 18%;
   width: 100%;
-  margin-bottom: 3%;
 }
 
 #forfeitButton {
@@ -166,6 +242,7 @@ h4 {
   right: 0;
   width: 20%;
   border-left: 2px solid;
+  background: rgba(0, 0, 0, 0.1);
 }
 
 #diceTitle {
@@ -176,6 +253,7 @@ h4 {
   align-items: center;
   font-size: x-large;
   font-weight: bolder;
+  background: rgba(0, 0, 0, 0.4);
 }
 
 #diceContent {
@@ -183,7 +261,7 @@ h4 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 25px
+  margin: 25px;
 }
 
 #diceCombinationValue {
@@ -205,22 +283,7 @@ h4 {
   margin: 20px;
 }
 
-#dice1 {
-  background-color: rgb(49, 26, 2);
-  height: 100%;
-}
-
-#dice2 {
-  background-color: rgb(49, 26, 2);
-  height: 100%;
-}
-
-#dice3 {
-  background-color: rgb(49, 26, 2);
-  height: 100%;
-}
-
-#dice4 {
+#dice1, #dice2, #dice3, #dice4 {
   background-color: rgb(49, 26, 2);
   height: 100%;
 }
@@ -239,46 +302,6 @@ h4 {
   font-size: large;
 }
 
-
-.box {
-  margin: auto;
-  height: auto;
-  text-align: center;
-  background: rgba(0,0,0,0.4);
-  padding: 40px;
-	padding-top: 10px;
-	border: 3px solid white;
-	border-radius: 20px;
-}
-
-.inputField {
-  width: 80%;
-  height: 20px;
-  border-radius: 5px;
-}
-
-#loginScreen {
-  margin: 0;
-  box-sizing: border-box;
-  align-items: center;
-  justify-content: center;
-}
-
-#loginBox {
-	width: 15%;
-}
-
-#rulesScreen {
-  margin: 0;
-  box-sizing: border-box;
-  align-items: center;
-  justify-content: center;
-}
-
-#rulesBox {
-  margin-top: 25px;
-	width: 60%;	
-}
 
 #standingsScreen {
   margin: 0;
