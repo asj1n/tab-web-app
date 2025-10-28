@@ -10,7 +10,6 @@ html, body {
   overflow: hidden;
   color: white;
   font-family: "JetBrains Mono", monospace;
-  font-optical-sizing: auto;
   font-weight: normal;
   font-style: normal;
 }
@@ -29,7 +28,6 @@ button {
   border-radius: 5px;
   margin: 10px;
   font-family: "JetBrains Mono", monospace;
-  font-optical-sizing: none;
   font-weight: bolder;
   font-style: normal;
   font-size: smaller;
@@ -41,7 +39,7 @@ button:hover {
 }
 
 hr {
-  background-color: 1px solid white;
+	border: 0.5px solid white;
 }
 
 h4 {
@@ -83,7 +81,6 @@ h4 {
   height: 20px;
   border-radius: 5px;
   font-family: "JetBrains Mono", monospace;
-  font-optical-sizing: auto;
   font-weight: normal;
 }
 
@@ -141,7 +138,6 @@ h4 {
   padding: 10px;
   list-style-type: decimal;
   overflow-y: auto;
-  scrollbar-gutter: stable;
   flex: 1 1 auto;
   background: rgba(0, 0, 0, 0.1);
 }
