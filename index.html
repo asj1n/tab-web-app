@@ -87,7 +87,11 @@
             <div id = "boardArea"> 
                 <div id = "boardContainer"></div>
 
-                <div id = "boardButtonsArea">  
+                <div id = "startGameButtonArea" class = "boardButtonsArea" style = "display: flex; justify-content: center;">  
+                    <button id = "startGameButton" onclick = "startGame();"> Start Game! </button>
+                </div>
+
+                <div id = "forfeitPassTurnButtonArea" class = "boardButtonsArea" style = "display: none; justify-content: center;">  
                     <button id = "forfeitButton" onclick = "forfeit();"> Forfeit </button>
                     <button id = "passTurnButton" onclick = "passTurn();"> Pass Turn </button>
                 </div>

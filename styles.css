@@ -113,7 +113,6 @@ h4 {
 #playScreen {
   margin: 0;
   text-align: center;
-  display: flex;
   justify-content: space-between;
   box-sizing: border-box;
 }
@@ -209,9 +208,15 @@ h4 {
   transform: scale(1.08);
 } */
 
-#boardButtonsArea {
+.boardButtonsArea {
   height: 18%;
   width: 100%;
+}
+
+#startGameButton {
+  width: 23%;
+  height: 80%;
+  font-size: large;
 }
 
 #forfeitButton {
