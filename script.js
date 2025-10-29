@@ -14,6 +14,12 @@ var latestDiceValue = 0;
 var pieceWith2AlternativesSelected = false;
 var pieceWith2AlternativesId = null;
 
+const forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
+const startGameButtonArea = document.getElementById("startGameButtonArea");
+
+const blueScoreboard = document.getElementById("bluePiecesRemaining");
+const redScoreboard = document.getElementById("redPiecesRemaining");
+
 class Piece {
     constructor(position, owner) {
         this.position = position;
@@ -107,7 +113,8 @@ class Game {
         this.bluePiecesLeft = boardColumns;
         this.redPiecesLeft = boardColumns;
         this.generateBoardUI();
-        this.updatePiecesOnUI()
+        this.updatePiecesOnUI();
+        this.checkRemainingPieces();
     }
 
     generateBoardUI() {
@@ -174,7 +181,7 @@ class Game {
                 cellPiece.addEventListener("click", (event) => {
                     let currPieceID = parseInt(event.target.id);
 
-                    if (currentPlayer == "Player1" &&this.board.getPieceOnPosition(currPieceID)?.owner == "Player1") {
+                    if (currentPlayer == "Player1" && this.board.getPieceOnPosition(currPieceID)?.owner == "Player1") {
                         let possiblePositionsForUserMove = calculateUserTargetPositions(this.board.getPieceOnPosition(currPieceID));
                         
                         if (possiblePositionsForUserMove.length != 0) {
@@ -194,11 +201,11 @@ class Game {
 
                     } else {
                         if (pieceWith2AlternativesSelected) {
-                            let aux = calculateUserTargetPositions(this.board.getPieceOnPosition(pieceWith2AlternativesId));
-                            if (aux.includes(currPieceID)) {
+                            let selectedPieceTargetPositions = calculateUserTargetPositions(this.board.getPieceOnPosition(pieceWith2AlternativesId));
+                            if (selectedPieceTargetPositions.includes(currPieceID)) {
                                 userMove(pieceWith2AlternativesId, currPieceID);
                             } else {
-                                console.log("Position clicked not within: ", aux);
+                                console.log("Position clicked not within: ", selectedPieceTargetPositions);
                             }
                         } else {
                             pieceWith2AlternativesSelected = false;
@@ -250,6 +257,9 @@ class Game {
 
         this.bluePiecesLeft = bluePiecesLeft;
         this.redPiecesLeft = redPiecesLeft;
+
+        blueScoreboard.innerHTML = this.bluePiecesLeft;
+        redScoreboard.innerHTML = this.redPiecesLeft;
     }
 
     makeMove(selectedPieceId, targetPosition) {
@@ -262,18 +272,21 @@ class Game {
         }
     }
 
-    processWin() {
+    processWin(forfeit = false) {
         disablePassTurnButton();
         disableRollDiceButton();
         latestDiceValue = 0;
-
-        if (this.bluePiecesLeft == 0) {
+        
+        if (forfeit || this.bluePiecesLeft == 0) {
             alert("AI has won!");
             aiWins++;
         } else {
             alert("You have won!");
             player1Wins++;
         }
+
+        forfeitPassTurnButtonArea.style.display = "none";
+        startGameButtonArea.style.display = "flex";
     }
 }
 
@@ -382,14 +395,14 @@ function aiMove() {
             latestDiceValue = 0;
 
             resetDices();
+
+            if (game.isGameFinished()) {
+                return;
+            }
         
             if (hasToRollAgain) {
                 aiMove();
             } else {
-                if (game.isGameFinished()) {
-                    return;
-                }
-
                 console.log("Your Turn");
                 currentPlayer = "Player1";
                 disableRollDiceButton(false);
@@ -621,11 +634,7 @@ function resetDices() {
 }
 
 function forfeit() {
-    if (opponent == "AI") {
-        aiWins++;
-    } else {
-        player2Wins++;
-    }
+    game.processWin(true);
     console.log("Forfeit");
 }
 
@@ -658,10 +667,9 @@ function saveSettings() {
     currentPlayer = whoRollsDiceFirst;
     game = new Game();
 
-    let forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
     forfeitPassTurnButtonArea.style.display = "none";
-    let startGameButtonArea = document.getElementById("startGameButtonArea");
     startGameButtonArea.style.display = "flex";
+
     resetDices();
     show("playScreen"); // Automatically switch to playScreen again. Comment if unwanted.
 
@@ -686,13 +694,14 @@ function addNewMessage() {
 }
 
 function startGame() {
-    let startGameButtonArea = document.getElementById("startGameButtonArea");
-    startGameButtonArea.style.display = "none";
-    let forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
     forfeitPassTurnButtonArea.style.display = "flex";
+    startGameButtonArea.style.display = "none";
     
     disableRollDiceButton(false);
     disablePassTurnButton(false);
+    disableForfeitButton(false);
+
+    game = new Game();
 
     if (whoRollsDiceFirst == "AI") {
         aiMove();

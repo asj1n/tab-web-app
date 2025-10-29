@@ -161,6 +161,20 @@ h4 {
   color: black;
 }
 
+#remainingPiecesArea {
+  border: 2px solid white;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px; /* space between items */
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  padding: 10px 20px;
+  margin-bottom: 10px;
+  margin-top: 0px;
+}
 
 #boardArea {
   flex: 1; /* takes up all leftover space */
@@ -280,7 +294,8 @@ h4 {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: larger;
+  font-size: x-large;
+  background: rgba(0,0,0,0.4);
 }
 
 #dices {
@@ -301,7 +316,7 @@ h4 {
   width: 100%;
   margin: 10px;
   align-content: center;
-  font-size: medium;
+  font-size: large;
 }
 
 #rollDiceButton {
