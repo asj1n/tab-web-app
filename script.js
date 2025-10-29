@@ -304,22 +304,40 @@ window.onload = () => {
 }
 
 
-function disableRollDiceButton(disable = true) {
+function disableRollDiceButton() {
     const diceButton = document.getElementById("rollDiceButton");
-    diceButton.disabled = disable;
-    diceButton.classList.toggle("disabled", disable);
+    diceButton.disabled = true;
+    diceButton.classList.toggle("disabled", true);
 }
 
-function disablePassTurnButton(disable = true) {
+function enableRollDiceButton() {
+    const diceButton = document.getElementById("rollDiceButton");
+    diceButton.disabled = false;
+    diceButton.classList.toggle("disabled", false);
+}
+
+function disablePassTurnButton() {
     const passTurnButton = document.getElementById("passTurnButton");
-    passTurnButton.disabled = disable;
-    passTurnButton.classList.toggle("disabled", disable);
+    passTurnButton.disabled = true;
+    passTurnButton.classList.toggle("disabled", true);
 }
 
-function disableForfeitButton(disable = true) {
+function enablePassTurnButton() {
+    const passTurnButton = document.getElementById("passTurnButton");
+    passTurnButton.disabled = false;
+    passTurnButton.classList.toggle("disabled", false);
+}
+
+function disableForfeitButton() {
     const forfeitButton = document.getElementById("forfeitButton");
-    forfeitButton.disabled = disable;
-    forfeitButton.classList.toggle("disabled", disable);
+    forfeitButton.disabled = true;
+    forfeitButton.classList.toggle("disabled", true);
+}
+
+function enableForfeitButton() {
+    const forfeitButton = document.getElementById("forfeitButton");
+    forfeitButton.disabled = false;
+    forfeitButton.classList.toggle("disabled", false);
 }
 
 function userMove(selectedPieceId, targetPosition) {
@@ -344,7 +362,7 @@ function userMove(selectedPieceId, targetPosition) {
         }
 
         if (hasToRollAgain) {
-            disableRollDiceButton(false);
+            enableRollDiceButton();
             latestDiceValue = 0;
         } else {
             disablePassTurnButton();
@@ -365,16 +383,20 @@ function aiMove() {
     setTimeout(() => {
         rollDice();
         let hasToRollAgain = willHaveToRollAgain(latestDiceValue);      
-        let validPiecesToMove = getAIValidMoves();
+        let validPiecesToMove = getAIValidPiecesToMove();
 
         if (validPiecesToMove.length == 0) {
             setTimeout(() => {
                 resetDices();
 
-                console.log("Your Turn");
-                currentPlayer = "Player1";
-                disableRollDiceButton(false);
-                disablePassTurnButton(false);
+                if (hasToRollAgain) {
+                    aiMove();
+                } else {
+                    console.log("Your Turn");
+                    currentPlayer = "Player1";
+                    enableRollDiceButton();
+                    disablePassTurnButton();
+                }
             }, 2000);
 
             return;
@@ -405,8 +427,8 @@ function aiMove() {
             } else {
                 console.log("Your Turn");
                 currentPlayer = "Player1";
-                disableRollDiceButton(false);
-                disablePassTurnButton(false);
+                enableRollDiceButton();
+                disablePassTurnButton();
             }
         }, 2000);
     }, 2000);
@@ -428,18 +450,18 @@ function getAIPiecesOnBoard() {
 }   
 
 
-function getAIValidMoves() {
+function getAIValidPiecesToMove() {
 
     let aiPiecesOnBoardList = getAIPiecesOnBoard();
-    let aiValidMovesList = [];
+    let aiValidPiecesToMoveList = [];
 
     for (let piece of aiPiecesOnBoardList) {
         let pieceTargetPositions = calculateAITargetPositions(piece);
         if (pieceTargetPositions.length > 0) {
-            aiValidMovesList.push(piece);
+            aiValidPiecesToMoveList.push(piece);
         }
     }
-    return aiValidMovesList;
+    return aiValidPiecesToMoveList;
 }
 
 
@@ -521,7 +543,7 @@ function calculateAITargetPositions(piece) {
 
     // a piece in last row can only move if there are no remaining pieces in the initial row of the same color
     if (currentRow == 1) {
-        for (let i = 3 * boardColumns; i < 4 * boardColumns - 1; i++) {
+        for (let i = 3 * boardColumns; i < 4 * boardColumns; i++) {
             if (game.board.getPieceOnPosition(i)?.getOwner() == "AI") {
                 return targetPositions;
             }
@@ -568,6 +590,28 @@ function calculateAITargetPositions(piece) {
     return targetPositions;
 }
 
+function getUserValidPiecesToMove() {
+    let userPiecesOnBoard = [];
+
+    for (let i = 0; i < 4 * boardColumns; i++) {
+        let piece = game.board.getPieceOnPosition(i);
+        if (piece?.getOwner() == "Player1") {
+            userPiecesOnBoard.push(piece);
+        }
+    }
+
+    let userValidPiecesToMoveList = [];
+    
+    for (let piece of userPiecesOnBoard) {
+        let pieceTargetPositions = calculateUserTargetPositions(piece);
+
+        if (pieceTargetPositions.length > 0) {
+            userValidPiecesToMoveList.push(piece);
+        }
+    }
+
+    return userValidPiecesToMoveList;
+} 
 
 function show(elementId) {
     let screenToShow = document.getElementById(elementId);
@@ -601,6 +645,27 @@ function rollDice() {
     updatePlayName.textContent = diceValueName(value);
     
     latestDiceValue = value;
+
+    if (currentPlayer == "Player1") {
+        let userValidPiecesToMoveList = getUserValidPiecesToMove();
+        console.log("Available moves", userValidPiecesToMoveList);
+        if (userValidPiecesToMoveList.length > 0) {
+            disablePassTurnButton();
+        } else {
+            if (latestDiceValue == 4 || latestDiceValue == 6) {
+                console.log("User can reroll again");
+                disablePassTurnButton();
+
+                setTimeout(() => {
+                    resetDices();
+                    enableRollDiceButton();
+                }, 1000);
+            } else {
+                console.log("No moves available, enabling PassTurn button")
+                enablePassTurnButton();
+            }
+        }
+    }
 }   
 
 function diceValueName(value) {
@@ -697,9 +762,9 @@ function startGame() {
     forfeitPassTurnButtonArea.style.display = "flex";
     startGameButtonArea.style.display = "none";
     
-    disableRollDiceButton(false);
-    disablePassTurnButton(false);
-    disableForfeitButton(false);
+    enableRollDiceButton();
+    disablePassTurnButton();
+    enableForfeitButton();
 
     game = new Game();
 
