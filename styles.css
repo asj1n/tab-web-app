@@ -38,6 +38,13 @@ button:hover {
   border-color: orange;
 }
 
+button.disabled {
+  background: linear-gradient(to bottom, #393939ff 25%, #323232 50%, #212121 75%, #101010 100%);
+  color: grey;
+  border: transparent;
+  cursor: not-allowed;
+}
+
 hr {
 	border: 0.5px solid white;
 }

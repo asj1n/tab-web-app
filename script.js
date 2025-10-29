@@ -1,5 +1,5 @@
 var currentVisibleScreen = document.getElementById("playScreen");
-var boardColumns = 9;
+var boardColumns = 7;
 var messageNumber = 1;
 var opponent = "AI";
 var whoRollsDiceFirst = "Player1";
@@ -8,8 +8,11 @@ var player1Wins = 0;
 var player2Wins = 0;
 var aiWins = 0;
 
-var currentPlayer = "Player1";
+var currentPlayer = whoRollsDiceFirst;
 var latestDiceValue = 0;
+
+var pieceWith2AlternativesSelected = false;
+var pieceWith2AlternativesId = null;
 
 class Piece {
     constructor(position, owner) {
@@ -48,6 +51,26 @@ class Piece {
     getOwner() {
         return this.owner;
     }
+
+    getColorBasedOnState() {
+        if (this.owner == "Player1") {
+            if (this.state == "neverMoved") {
+                return "background-color: rgb(50, 91, 225); border: 3px solid rgba(181, 198, 252, 1);";
+            } else if (this.state == "neverBeenInFourthRow") {
+                return "background-color: rgb(50, 91, 225); border: 3px solid rgba(85, 123, 247, 1);";
+            }   else {
+                return "background-color: rgb(50, 91, 225); border: 3px solid rgba(0, 38, 163, 1);";
+            }
+        } else {
+            if (this.state == "neverMoved") {
+                return "background-color: rgb(225, 59, 50); border: 3px solid rgba(254, 201, 198, 1);";
+            } else if (this.state == "neverBeenInFourthRow") {
+                return "background-color: rgb(225, 59, 50); border: 3px solid rgba(252, 116, 109, 1);";
+            }   else {
+                return "background-color: rgb(225, 59, 50);; border: 3px solid rgba(157, 13, 6, 1);";
+            }
+        }
+    }
 }
 
 class Board {
@@ -69,7 +92,7 @@ class Board {
         return this.array[position] == null;
     }
 
-    getContentOnPosition(position) {
+    getPieceOnPosition(position) {
         return this.array[position];
     }
     
@@ -111,39 +134,75 @@ class Game {
                 }
 
                 cellPiece.addEventListener("mouseenter", (event) => {
-                    // transparent highlight on targetDestination(s)
                     let currPieceID = parseInt(event.target.id);
-                    if (currentPlayer == "Player1" && game.board.getContentOnPosition(currPieceID)?.owner == "Player1") {
-                        let targetPositionsList = calculateUserTargetPositions(game.board.getContentOnPosition(currPieceID));
+                    if (currentPlayer == "Player1" && game.board.getPieceOnPosition(currPieceID)?.owner == "Player1") {
+                        let targetPositionsList = calculateUserTargetPositions(game.board.getPieceOnPosition(currPieceID));
 
-                        cellPiece.style.transition = "transform 0.15s ease, background 0.15s ease";
-                        cellPiece.style.transform = "scale(1.08)";
-                        // console.log("Entered piece " + currPieceID + " with target Positions ", targetPositionsList);
-                        for (let position of targetPositionsList) {
-                            let positionId = position.toString();
-                            // console.log(positionId);
-                            document.getElementById(positionId).setAttribute("style", "background-color: rgba(11, 234, 26, 0.3);")
+                        if (currPieceID != pieceWith2AlternativesId) { 
+                            pieceWith2AlternativesId = null;
+                            pieceWith2AlternativesSelected = false;
+                            this.updatePiecesOnUI();
+
+                            cellPiece.style.transition = "transform 0.2s ease";
+                            cellPiece.style.transform = "scale(1.08)";
+
+                            for (let position of targetPositionsList) {
+                                let positionId = position.toString();
+                                document.getElementById(positionId).setAttribute("style", "background-color: rgba(11, 234, 26, 0.3); border: 3px dotted rgba(2, 25, 3, 0.45);")
+                            }
                         }
                     }
                 });
 
                 cellPiece.addEventListener("mouseleave", (event) => {
-                    this.updatePiecesOnUI();
+                    let currPieceID = parseInt(event.target.id);
+                    if (currentPlayer == "Player1" && game.board.getPieceOnPosition(currPieceID)?.owner == "Player1") {
+                        let targetPositionsList = calculateUserTargetPositions(game.board.getPieceOnPosition(currPieceID));
+                        
+                        if (!pieceWith2AlternativesSelected) {
+                            cellPiece.style.transition = "transform 0.2s ease";
+                            cellPiece.style.transform = "scale(1)";
+
+                            if (targetPositionsList.length != 0) {
+                                console.log("updatedUI");
+                                this.updatePiecesOnUI();
+                            }
+                        }
+                    }
                 });
 
                 cellPiece.addEventListener("click", (event) => {
-                    let id = event.target.id;
-                    if (currentPlayer == "Player1") {
-                        if (this.board.getContentOnPosition(id)?.owner == "Player1") {
-                            let possiblePositionsForUserMove = calculateUserTargetPositions(this.board.getContentOnPosition(parseInt(id)));
-                            if (possiblePositionsForUserMove.length != 0) {
-                                //console.log("Valid Selection")
-                                userMove(parseInt(id), possiblePositionsForUserMove);
-                            } else {
-                                console.log("Piece " + id + " can't move.");
-                            }
+                    let currPieceID = parseInt(event.target.id);
 
+                    if (currentPlayer == "Player1" &&this.board.getPieceOnPosition(currPieceID)?.owner == "Player1") {
+                        let possiblePositionsForUserMove = calculateUserTargetPositions(this.board.getPieceOnPosition(currPieceID));
+                        
+                        if (possiblePositionsForUserMove.length != 0) {
+                            //console.log("Valid Selection")
+                            if (possiblePositionsForUserMove.length == 2) {
+                                pieceWith2AlternativesSelected = true;
+                                pieceWith2AlternativesId = currPieceID;
+                                console.log("2 Moves Possible")
+                            } else {
+                                pieceWith2AlternativesSelected = false;
+                                pieceWith2AlternativesId = null;
+                                userMove(currPieceID, possiblePositionsForUserMove[0]);
+                            }
                         } else {
+                            console.log("Piece " + currPieceID + " can't move.");
+                        }
+
+                    } else {
+                        if (pieceWith2AlternativesSelected) {
+                            let aux = calculateUserTargetPositions(this.board.getPieceOnPosition(pieceWith2AlternativesId));
+                            if (aux.includes(currPieceID)) {
+                                userMove(pieceWith2AlternativesId, currPieceID);
+                            } else {
+                                console.log("Position clicked not within: ", aux);
+                            }
+                        } else {
+                            pieceWith2AlternativesSelected = false;
+                            pieceWith2AlternativesId = null;
                             console.log("Invalid Selection");
                         }
                     }
@@ -162,12 +221,12 @@ class Game {
 
             if (currentPiece != null) {
                 if (currentPiece.getOwner() == "Player1") {
-                    cellToPaint.setAttribute("style", "background-color: rgb(50, 91, 225); border: 3px solid rgba(85, 123, 247, 1);")
+                    cellToPaint.setAttribute("style", currentPiece.getColorBasedOnState());
                 } else {
-                    cellToPaint.setAttribute("style", "background-color: rgb(225, 59, 50); border: 3px solid rgba(252, 116, 109, 1)")
+                    cellToPaint.setAttribute("style", currentPiece.getColorBasedOnState());
                 }
             } else {
-                cellToPaint.setAttribute("style", "background-color: transparent;")
+                cellToPaint.setAttribute("style", "background-color: transparent;");
             }
         }
     }
@@ -181,7 +240,7 @@ class Game {
         let redPiecesLeft = 0;
         
         for (let i = 0; i < this.board.size(); i++) {
-            let currentPiece = this.board.getContentOnPosition(i);
+            let currentPiece = this.board.getPieceOnPosition(i);
             if (currentPiece?.getOwner() == "Player1") {
                 bluePiecesLeft++;
             } else if (currentPiece?.getOwner() == opponent) {
@@ -228,47 +287,41 @@ window.onload = () => {
     console.log("Rolls dice first: " + whoRollsDiceFirst);
     console.log("AI Level: " + aiDifficultyLevel);
     currentVisibleScreen.style.display = "flex";
+    disableRollDiceButton();
 }
 
 
 function disableRollDiceButton(disable = true) {
-    let diceButton = document.getElementById("rollDiceButton");
-
-    if (disable) {       
-        diceButton.setAttribute("style", "background: linear-gradient(to bottom, #4e4d4d 25%, #323232 50%, #212121 75%, #101010 100%);");
-        diceButton.disabled = true;
-    } else {
-        diceButton.setAttribute("style", "background: linear-gradient(to bottom, #FFFFFF 0%, #F1F1F1 50%, #E1E1E1 51%, #F6F6F6 100%);");
-        diceButton.disabled = false;
-    }
+    const diceButton = document.getElementById("rollDiceButton");
+    diceButton.disabled = disable;
+    diceButton.classList.toggle("disabled", disable);
 }
 
 function disablePassTurnButton(disable = true) {
-    let passTurnButton = document.getElementById("passTurnButton");
-
-    if (disable) {       
-        passTurnButton.setAttribute("style", "background: linear-gradient(to bottom, #4e4d4d 25%, #323232 50%, #212121 75%, #101010 100%);");
-        passTurnButton.disabled = true;
-    } else {
-        passTurnButton.setAttribute("style", "background: linear-gradient(to bottom, #FFFFFF 0%, #F1F1F1 50%, #E1E1E1 51%, #F6F6F6 100%);");
-        passTurnButton.disabled = false;
-    }
-
+    const passTurnButton = document.getElementById("passTurnButton");
+    passTurnButton.disabled = disable;
+    passTurnButton.classList.toggle("disabled", disable);
 }
 
+function disableForfeitButton(disable = true) {
+    const forfeitButton = document.getElementById("forfeitButton");
+    forfeitButton.disabled = disable;
+    forfeitButton.classList.toggle("disabled", disable);
+}
 
-function userMove(selectedPieceId, possiblePositionsForUserMove) {
+function userMove(selectedPieceId, targetPosition) {
     if (latestDiceValue != 0) {
         let hasToRollAgain = willHaveToRollAgain(latestDiceValue);
-        let targetPosition;
-        if (possiblePositionsForUserMove.length > 1) {
-            targetPosition = possiblePositionsForUserMove[1]; // If user has two choices, for now choose always first
-        }
-        else {
-            targetPosition = possiblePositionsForUserMove[0];
-        }
+  
+        // let targetPosition;
+        // if (possiblePositionsForUserMove.length > 1) {
+        //     targetPosition = possiblePositionsForUserMove[1]; // If user has two choices, for now choose always first
+        // }
+        // else {
+        //     targetPosition = possiblePositionsForUserMove[0];
+        // }
 
-        console.log("User Move: (" + latestDiceValue + " " + hasToRollAgain + ") ", selectedPieceId + " -> " + targetPosition + " ", possiblePositionsForUserMove);
+        // console.log("User Move: (" + latestDiceValue + " " + hasToRollAgain + ") ", selectedPieceId + " -> " + targetPosition + " ", possiblePositionsForUserMove);
 
         game.makeMove(selectedPieceId, targetPosition);
         resetDices();
@@ -298,12 +351,7 @@ function aiMove() {
 
     setTimeout(() => {
         rollDice();
-        let hasToRollAgain = willHaveToRollAgain(latestDiceValue);
-        // give priority to moves that end up conquering a user's piece
-        // give priority in case of a 1 to piece wwhose state is "neverMoved"
-        // let selectedPieceId = chosenRandomPieceId() 
-        // game.makeMove(selectedPieceId)        
-
+        let hasToRollAgain = willHaveToRollAgain(latestDiceValue);      
         let validPiecesToMove = getAIValidMoves();
 
         if (validPiecesToMove.length == 0) {
@@ -356,7 +404,7 @@ function getAIPiecesOnBoard() {
     let aiPiecesList = [];
 
     for (let i = 0; i < game.board.size(); i++) {
-        let piece = game.board.getContentOnPosition(i); 
+        let piece = game.board.getPieceOnPosition(i); 
         if (piece?.owner == "AI") {
             aiPiecesList.push(piece);
         }
@@ -383,8 +431,6 @@ function getAIValidMoves() {
 
 
 function calculateUserTargetPositions(piece) {
-    // doesnt take into consideration piece's state for now
-    // that will be checked by a method that evaluates which moves are valid;
 
     let targetPositions = [];
 
@@ -394,12 +440,21 @@ function calculateUserTargetPositions(piece) {
 
     let targetRow = Math.floor(targetPosition / boardColumns) + 1;
 
+    // a piece in the 4th row can only move if there aren't pieces of the same color in the 1st / initial row
+    if (currentRow == 4) {
+        for (let i = 0; i < boardColumns; i++) {
+            if (game.board.getPieceOnPosition(i)?.getOwner() == "Player1") {
+                return targetPositions;
+            }
+        }
+    }
+
     // a piece in 4th row can only move if there are no remaining pieces in the 1st row
 
     if (currentRow == targetRow) { // if the piece doesn't have to change rows (jump)
         // can always move pieces forward in its own row except if the target position already cantains an allied piece
         // or when it has never moved and the dice value isnt a one
-        if (game.board.isPositionFree(targetPosition) || game.board.getContentOnPosition(targetPosition).getOwner() != currentPlayer) {
+        if (game.board.isPositionFree(targetPosition) || game.board.getPieceOnPosition(targetPosition).getOwner() != currentPlayer) {
             if (piece.getState() == "neverMoved" && latestDiceValue == 1) {
                 targetPositions.push(targetPosition);
             } else if (piece.getState() != "neverMoved") {
@@ -414,7 +469,7 @@ function calculateUserTargetPositions(piece) {
             let secondTargetPosition = rowEndPosition - (2*boardColumns - 1) + (latestDiceValue - (stepsToReachRowEnd + 1)); 
             
             // can always jump down except when the target position is occupied by an ally piece
-            if (game.board.isPositionFree(secondTargetPosition) || game.board.getContentOnPosition(secondTargetPosition).getOwner() != currentPlayer) {
+            if (game.board.isPositionFree(secondTargetPosition) || game.board.getPieceOnPosition(secondTargetPosition).getOwner() != currentPlayer) {
                 targetPositions.push(secondTargetPosition);
             }
         }
@@ -423,8 +478,7 @@ function calculateUserTargetPositions(piece) {
 
             // a piece can always jump up except when the target position is occupied by an ally piece
             // or when it is in the 3rd row and has already been in the 4th.
-            // console.log("Checking Here")
-            if (game.board.isPositionFree(targetPosition) || game.board.getContentOnPosition(targetPosition).getOwner() != currentPlayer) {
+            if (game.board.isPositionFree(targetPosition) || game.board.getPieceOnPosition(targetPosition).getOwner() != currentPlayer) {
                 if (!(piece.getState() == "hasBeenInFourthRow" && currentRow == 3) || (piece.getState() == "neverMoved" && latestDiceValue == 1)) {
                     if (piece.getState() == "neverMoved" && latestDiceValue == 1) {
                         targetPositions.push(targetPosition);
@@ -442,8 +496,6 @@ function calculateUserTargetPositions(piece) {
 
 
 function calculateAITargetPositions(piece) {
-    // doesnt take into consideration piece's state for now
-    // that will be checked by a method that evaluates which moves are valid;
 
     let targetPositions = [];
 
@@ -453,49 +505,48 @@ function calculateAITargetPositions(piece) {
 
     let targetRow = Math.floor(targetPosition / boardColumns) + 1;
 
-    if (piece.getState() == "neverMoved" && latestDiceValue != 1) {
-        return targetPositions;
-    }
 
-    // a piece in 4th row can only move if there are no remaining pieces in the 1st row
+    // a piece in last row can only move if there are no remaining pieces in the initial row of the same color
+    if (currentRow == 1) {
+        for (let i = 3 * boardColumns; i < 4 * boardColumns - 1; i++) {
+            if (game.board.getPieceOnPosition(i)?.getOwner() == "AI") {
+                return targetPositions;
+            }
+        }
+    }
 
     if (currentRow == targetRow) { // if the piece doesn't have to change rows (jump)
         // can always move pieces forward in its own row except if the target position already cantains an allied piece
         // or when it has never moved and the dice value isnt a one
-        if (game.board.isPositionFree(targetPosition) || game.board.getContentOnPosition(targetPosition).getOwner() != currentPlayer) {
+        if (game.board.isPositionFree(targetPosition) || game.board.getPieceOnPosition(targetPosition).getOwner() != currentPlayer) {
             if (piece.getState() == "neverMoved" && latestDiceValue == 1) {
                 targetPositions.push(targetPosition);
             } else if (piece.getState() != "neverMoved") {
-                // console.log("Arrived Here");
                 targetPositions.push(targetPosition);
             }
         }
 
     } else { // if the piece has to change rows (jump)
-        if (currentRow != 1) { // it can always jump up (from red POV) except in the 1st row 
+        if (currentRow != 1) { // it can always jump up (from red POV, down from blue POV) except in the 1st row 
             let rowEndPosition = (currentRow) * boardColumns - 1;
             let stepsToReachRowEnd = rowEndPosition - piece.getPosition();
             let secondTargetPosition = rowEndPosition - (2*boardColumns - 1) + (latestDiceValue - (stepsToReachRowEnd + 1)); 
             
             // can always jump down except when the target position is occupied by an ally piece
-            if (game.board.isPositionFree(secondTargetPosition) || game.board.getContentOnPosition(secondTargetPosition).getOwner() != currentPlayer) {
-                targetPositions.push(secondTargetPosition);
+            if (game.board.isPositionFree(secondTargetPosition) || game.board.getPieceOnPosition(secondTargetPosition).getOwner() != currentPlayer) {
+                if (!(piece.getState() == "hasBeenInFourthRow" && currentRow == 2) || (piece.getState() == "neverMoved" && latestDiceValue == 1)) {
+                    if (piece.getState() == "neverMoved" && latestDiceValue == 1) {
+                        targetPositions.push(secondTargetPosition);
+                    } else if (piece.getState() != "neverMoved") {
+                        targetPositions.push(secondTargetPosition);
+                    }
+                }
             }
         }
 
-        if (currentRow < 3) { // it can only jump down (from red POV) int the 1st and second rows
-            // a piece can always jump up except when the target position is occupied by an ally piece
-            // or when it is in the 3rd row and has already been in the 4th.
-            // console.log("Checking Here")
-            if (game.board.isPositionFree(targetPosition) || game.board.getContentOnPosition(targetPosition).getOwner() != currentPlayer) {
-                if (!(piece.getState() == "hasBeenInFourthRow" && currentRow == 3) || (piece.getState() == "neverMoved" && latestDiceValue == 1)) {
-                    if (piece.getState() == "neverMoved" && latestDiceValue == 1) {
-                        targetPositions.push(targetPosition);
-                    } else if (piece.getState() != "neverMoved") {
-                        // console.log("Arrived Here");
-                        targetPositions.push(targetPosition);
-                    }
-                }
+        if (currentRow < 3) { // it can only jump down (from red POV, up from blue POV) in the 1st and 2nd rows
+            if (game.board.isPositionFree(targetPosition) || game.board.getPieceOnPosition(targetPosition).getOwner() != currentPlayer) {
+                targetPositions.push(targetPosition);
             }
         }
     }
@@ -513,35 +564,30 @@ function show(elementId) {
 }
 
 function rollDice() {
-    if (document.getElementById("startGameButtonArea").style.display == "none") {
-        let value = 0;
+    let value = 0;
 
-        disableRollDiceButton(); // prevent re-rolls
+    disableRollDiceButton(); // prevent re-rolls
 
-        for (i = 1; i <= 4; i++) {
-            let random = Math.floor(Math.random() * 2);
-            let dice = document.getElementById("dice" + i);
-            value += random;
+    for (i = 1; i <= 4; i++) {
+        let random = Math.floor(Math.random() * 2);
+        let dice = document.getElementById("dice" + i);
+        value += random;
 
-            if (random == 0) {
-                dice.style.backgroundColor = "rgb(49, 26, 2)";
-            } else {
-                dice.style.backgroundColor = "rgb(224, 167, 105)";
-            }
+        if (random == 0) {
+            dice.style.backgroundColor = "rgb(49, 26, 2)";
+        } else {
+            dice.style.backgroundColor = "rgb(224, 167, 105)";
         }
-
-        if (value == 0) { value = 6; }
-
-        let updateValueDisplay = document.getElementById("diceCombinationValue");
-        updateValueDisplay.textContent = value;
-        let updatePlayName = document.getElementById("diceCombinationValueName");
-        updatePlayName.textContent = diceValueName(value);
-        // console.log(value + " " + willHaveToRollAgain(value));
-
-        latestDiceValue = value;
-    } else {
-        console.log("Please start the game first.")
     }
+
+    if (value == 0) { value = 6; }
+
+    let updateValueDisplay = document.getElementById("diceCombinationValue");
+    updateValueDisplay.textContent = value;
+    let updatePlayName = document.getElementById("diceCombinationValueName");
+    updatePlayName.textContent = diceValueName(value);
+    
+    latestDiceValue = value;
 }   
 
 function diceValueName(value) {
@@ -616,7 +662,6 @@ function saveSettings() {
     let startGameButtonArea = document.getElementById("startGameButtonArea");
     startGameButtonArea.style.display = "flex";
     resetDices();
-
     show("playScreen"); // Automatically switch to playScreen again. Comment if unwanted.
 
     // console.clear();
@@ -645,6 +690,9 @@ function startGame() {
     let forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
     forfeitPassTurnButtonArea.style.display = "flex";
     
+    disableRollDiceButton(false);
+    disablePassTurnButton(false);
+
     if (whoRollsDiceFirst == "AI") {
         aiMove();
     }
