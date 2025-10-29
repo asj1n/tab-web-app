@@ -655,6 +655,7 @@ function saveSettings() {
     opponent = document.querySelector('input[name = "vs"]:checked').value;
     whoRollsDiceFirst = document.querySelector('input[name = "whoFirst"]:checked').value;
     aiDifficultyLevel = document.querySelector('input[name = "aiLevel"]:checked').value;
+    currentPlayer = whoRollsDiceFirst;
     game = new Game();
 
     let forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
