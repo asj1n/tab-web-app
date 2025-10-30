@@ -1,6 +1,6 @@
 var currentVisibleScreen = document.getElementById("playScreen");
 var boardColumns = 7;
-var messageNumber = 1;
+// var messageCounter = 1;
 var opponent = "AI";
 var whoRollsDiceFirst = "Player1";
 var aiDifficultyLevel = "Easy";
@@ -13,6 +13,8 @@ var latestDiceValue = 0;
 
 var pieceWith2AlternativesSelected = false;
 var pieceWith2AlternativesId = null;
+
+var numbersToggled = false;
 
 const forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
 const startGameButtonArea = document.getElementById("startGameButtonArea");
@@ -89,9 +91,13 @@ class Board {
 
     movePiece(selectedPieceId, targetPosition) {
         let piece = this.array[selectedPieceId];
+        let targetPiece = this.array[targetPosition];
+
         this.array[targetPosition] = piece;
         this.array[selectedPieceId] = null;
         piece.setPosition(targetPosition);
+
+        return targetPiece;
     }
 
     isPositionFree(position) {
@@ -238,6 +244,19 @@ class Game {
         }
     }
 
+    toggleNumbersOnUI() {
+        for (let i = 0; i < this.board.array.length; i++) {
+            let cell = document.getElementById(i);
+
+            if (numbersToggled) {
+                cell.textContent = i;
+            } else {
+                cell.textContent = "";
+            }
+        }
+    }
+
+
     isGameFinished() {
         return this.bluePiecesLeft == 0 || this.redPiecesLeft == 0; 
     }
@@ -263,7 +282,13 @@ class Game {
     }
 
     makeMove(selectedPieceId, targetPosition) {
-        this.board.movePiece(selectedPieceId, targetPosition);
+        let targetPositionPiece = this.board.movePiece(selectedPieceId, targetPosition);
+        addNewMessage(currentPlayer + " moved piece in position " + selectedPieceId +" to " + targetPosition);
+
+        if (targetPositionPiece != null) {
+            addNewMessage(currentPlayer + " has captured a piece!");
+        } 
+
         this.checkRemainingPieces();
         this.updatePiecesOnUI();
 
@@ -278,10 +303,11 @@ class Game {
         latestDiceValue = 0;
         
         if (forfeit || this.bluePiecesLeft == 0) {
-            alert("AI has won!");
+            currentPlayer = opponent;
+            addNewMessage(currentPlayer + " has won!");
             aiWins++;
         } else {
-            alert("You have won!");
+            addNewMessage("Player1 has won!");
             player1Wins++;
         }
 
@@ -380,6 +406,8 @@ function aiMove() {
     disableRollDiceButton();
     disablePassTurnButton();
 
+    addNewMessage(currentPlayer + " it's your turn, please roll the dice");
+
     setTimeout(() => {
         rollDice();
         let hasToRollAgain = willHaveToRollAgain(latestDiceValue);      
@@ -393,7 +421,9 @@ function aiMove() {
                     aiMove();
                 } else {
                     console.log("Your Turn");
+                    addNewMessage(currentPlayer + " passed their turn");
                     currentPlayer = "Player1";
+                    addNewMessage(currentPlayer + " it's your turn, please roll the dice");
                     enableRollDiceButton();
                     disablePassTurnButton();
                 }
@@ -427,6 +457,7 @@ function aiMove() {
             } else {
                 console.log("Your Turn");
                 currentPlayer = "Player1";
+                addNewMessage(currentPlayer + " it's your turn, please roll the dice");
                 enableRollDiceButton();
                 disablePassTurnButton();
             }
@@ -646,6 +677,8 @@ function rollDice() {
     
     latestDiceValue = value;
 
+    addNewMessage(diceValueName(latestDiceValue) + " " + currentPlayer + " rolled a " + latestDiceValue);
+
     if (currentPlayer == "Player1") {
         let userValidPiecesToMoveList = getUserValidPiecesToMove();
         console.log("Available moves", userValidPiecesToMoveList);
@@ -654,6 +687,7 @@ function rollDice() {
         } else {
             if (latestDiceValue == 4 || latestDiceValue == 6) {
                 console.log("User can reroll again");
+                addNewMessage(currentPlayer + " it's your turn, please roll the dice");
                 disablePassTurnButton();
 
                 setTimeout(() => {
@@ -662,6 +696,7 @@ function rollDice() {
                 }, 1000);
             } else {
                 console.log("No moves available, enabling PassTurn button")
+                addNewMessage(currentPlayer + " has no moves possible, please pass your turn");
                 enablePassTurnButton();
             }
         }
@@ -699,6 +734,7 @@ function resetDices() {
 }
 
 function forfeit() {
+    addNewMessage(currentPlayer + " has forfeited");
     game.processWin(true);
     console.log("Forfeit");
 }
@@ -707,6 +743,7 @@ function passTurn() {
     console.clear();
     console.log("Turn Passed");
     resetDices();
+    addNewMessage(currentPlayer + " passed their turn");
     currentPlayer = opponent;
     aiMove();
 }
@@ -730,6 +767,8 @@ function saveSettings() {
     whoRollsDiceFirst = document.querySelector('input[name = "whoFirst"]:checked').value;
     aiDifficultyLevel = document.querySelector('input[name = "aiLevel"]:checked').value;
     currentPlayer = whoRollsDiceFirst;
+    
+    clearMessages();
     game = new Game();
 
     forfeitPassTurnButtonArea.style.display = "none";
@@ -747,15 +786,37 @@ function saveSettings() {
     // console.log("------------------------------------------------------------\n\n")
 }
 
-function addNewMessage() {
+function addNewMessage(message) {
     const list = document.getElementById("messagesList");
     const li = document.createElement("li");
-    li.textContent = messageNumber++ + " - Player X Turn";
+    //li.textContent = messageCounter++ + " - " + message;
+    li.textContent = message;
     li.classList.add("new-message");
+
+    if (currentPlayer == "Player1") {
+        li.classList.add("player1");
+    } else {
+        li.classList.add("ai");
+    }
+
     // Add newest message to the beginning of the list so the newest is always on top
     list.insertBefore(li, list.firstChild);
+
     // remove highlight from last message
-    setTimeout(() => li.classList.remove("new-message"), 2000);
+    setTimeout(() => {
+        li.classList.remove("new-message")
+    }, 2000);
+}
+
+function clearMessages() {
+  const list = document.getElementById("messagesList");
+  list.innerHTML = "";
+//   messageCounter = 1;
+}
+
+function toggleNumbers() {
+    numbersToggled = !numbersToggled;
+    game.toggleNumbersOnUI();
 }
 
 function startGame() {
@@ -765,11 +826,16 @@ function startGame() {
     enableRollDiceButton();
     disablePassTurnButton();
     enableForfeitButton();
-
+    clearMessages();
+    
     game = new Game();
+
+    currentPlayer = whoRollsDiceFirst;
 
     if (whoRollsDiceFirst == "AI") {
         aiMove();
+    } else {
+        addNewMessage(currentPlayer + " it's your turn, please roll the dice");
     }
     
     console.log("Start Game! button pressed");

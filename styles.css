@@ -161,6 +161,28 @@ h4 {
   color: black;
 }
 
+#messagesList li.ai {
+  color: rgb(225, 59, 50);
+  font-weight: bolder;
+}
+
+#messagesList li.player1 {
+  color: #3ab0ff;
+  font-weight: bolder;
+}
+
+#messagesList li.new-message.ai {
+  background-color: rgb(225, 59, 50);
+  color: white;
+  font-weight: bolder;
+}
+
+#messagesList li.new-message.player1 {
+  background-color: #3ab0ff;
+  color: white;
+  font-weight: bolder;
+}
+
 #remainingPiecesArea {
   border: 2px solid white;
   border-radius: 15px;

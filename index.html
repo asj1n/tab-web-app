@@ -81,14 +81,14 @@
 
                 <ol id = "messagesList"></ol>
                 
-                <button onclick = "addNewMessage()" style = "width: 100%; margin: 0px; flex: 0 0 auto;"> Add new message - test button </button>
+                <button onclick = "toggleNumbers()" style = "width: 100%; margin: 0px; flex: 0 0 auto;"> Toggle Board Numbers </button>
             </div>
 
             <div id = "boardArea"> 
                 <div id = "remainingPiecesArea" class = "box">
                     <span id = "bluePiecesRemaining" class = "score" style = "color: #3ab0ff;"></span>
                     <span class = "dash"> - </span>
-                    <span id = "redPiecesRemaining" class="score" style = "color: #ff4b4b;"></span>
+                    <span id = "redPiecesRemaining" class="score" style = "color: rgb(225, 59, 50);"></span>
                 </div>
 
                 <div id = "boardContainer"></div>
@@ -153,7 +153,7 @@
                 </p>
 
                 <p style = "text-align: left;">
-                    PLAYER2
+                    <s>PLAYER 2</s>
                     <span style = "float: right;">
                         <span id = "player2"></span>
                     </span>
