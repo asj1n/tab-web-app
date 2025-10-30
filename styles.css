@@ -49,7 +49,7 @@ hr {
 	border: 0.5px solid white;
 }
 
-h4 {
+h3, h4 {
   margin-bottom: 10px;
 }
 
@@ -123,8 +123,8 @@ h4 {
 
 #messagesArea {
   width: 20%;
-  display: flex;  /* Remove once message button is removed */
-  flex-direction: column; /* Remove once message button is removed */
+  display: flex; 
+  flex-direction: column;
   border-right: 2px solid;
 }
 
@@ -242,14 +242,18 @@ h4 {
   justify-content: center;
 }
 
-/* .cellPiece:hover {
-  transition: transform 0.15s ease, background 0.15s ease;
-  transform: scale(1.08);
-} */
 
 .boardButtonsArea {
   height: 18%;
   width: 100%;
+}
+
+#toggleBoardNumbersButton {
+  width: 100%; 
+  height: 10%; 
+  margin: 0px; 
+  flex: 0 0 auto;
+  font-size: medium;
 }
 
 #startGameButton {
@@ -320,7 +324,7 @@ h4 {
   background: rgba(0,0,0,0.4);
 }
 
-#dices {
+#dice {
   width: 100%;
   height: 40%;
   display: flex;

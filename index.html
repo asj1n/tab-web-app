@@ -49,31 +49,128 @@
                 
                 <hr>
 
-                <h4><u> Objetivo </u></h4>
-                <p> Ser o último jogador com peças no tabuleiro. O jogo termina quando o adversário perde todas as peças. </p>
+                <h3><u> Board and Pieces </u></h3>
+                <p> The board has 4 rows and an odd number of columns (7–15). Each player receives as many pieces as 
+                    there are columns, with the user's pieces being placed at the bottom (blue) and the opponent's 
+                    pieces at the top (red). The state of each piece can influence the flow of the game, with the 
+                    possible states being: "neverMoved", "neverBeenInFourthRow", or "hasBeenInFourthRow".
+                </p>
+                
+                <br>
 
-                <h4><u> Tabuleiro e Peças </u></h4>
-                <p> O tabuleiro possui 4 linhas e número ímpar de colunas (7–15). Cada jogador recebe tantas peças quanto o
-                    número de colunas. Peças humanas ficam em baixo; peças do computador ficam em cima. Estados das peças:
-                    não movida, movida, última fila. </p>
+                <h3><u> Stick Dice </u></h3>
+                <p> Four sticks with light and dark faces are used to simulate a dice roll. The number of light faces 
+                    facing up determines how many spaces a chosen piece can move (1, 2, 3, or 4). If no light face is 
+                    facing up, the dice value is considered 6 (instead of 0). After playing (if possible), the player 
+                    must roll the sticks again if the previous result was 1, 4, or 6. 
+                </p>
 
-                <h4><u> Dado de Paus </u></h4>
-                <p> São usados 4 paus com faces claras/escuras para simular um lançamento do dado. O número de faces claras
-                    define o valor do movimentos possiveis a se fazer com uma peça (1, 2, 3, 4, 6). Se
-                    sair 1, 4 ou 6, o jogador joga novamente. </p>
+                <br>
 
-                <h4><u> Movimento </u></h4>
-                <p> As peças movem-se em zigue-zague pelo tabuleiro. 1ª e 3ª linhas: esquerda → direita. 2ª e 4ª linhas:
-                    direita → esquerda. A primeira jogada exige um valor de 1 no lançamento do dado. Não é permitido ocupar
-                    uma casa já ocupada por uma peça do próprio jogador. </p>
+                <h3><u> Piece Movement </u></h3>
+                <p> The pieces move in a zigzag pattern across the board. On the 1st and 3rd rows, they move from left 
+                    to right. On the 2nd and 4th rows, they move from right to left. Before moving a piece, the player 
+                    must roll the dice, and the selected piece advances as many spaces as the value shown on the dice.
+                    
+                    The first time a piece moves, it must be with a value of 1, so the pieces that start moving first 
+                    are those on the far right from each player's perspective. Pieces of a given color can never re-enter 
+                    their starting row (the one they began from).
 
-                <h4><u> Capturas </u></h4>
-                <p> Se a peça parar numa casa com inimigo, a peça adversária é removida. </p>
+                    Each piece can enter the last row (the opponent's starting row) only once during the game. Once 
+                    there, they may only be moved if the player no longer has any of their own pieces (of the same 
+                    color) in their starting row.
 
-                <h4><u> Fim de Jogo </u></h4>
-                <p> Vence quem ainda tiver peças quando o oponente ficar sem nenhuma. </p>
+                    A piece can't be moved to a space already occupied by another piece of the same player. If a player 
+                    has no possible pieces to move and can't roll again (values 2 or 3), they must skip their turn.
+                </p>
+
+                <br>
+
+                <h3><u> Captures </u></h3>
+                <p> If there is an opponent's piece on the destination space, it is captured and removed from the board. 
+                </p>
+
+                <br>
+
+                <h3><u> End of the Game </u></h3>
+                <p> The game ends when one of the players has no pieces left. The winner is the player who still has 
+                    pieces on the board. 
+                </p>
+
+                <br>
+
+                <h3><u> Implementation Features </u></h3>
+                <p> To start a game, the user must press the <b> Start Game! </b> button. </p>
+                
+                <p> If the user wishes to change the number of board columns, the opponent (AI or Human), which 
+                    player rolls the dice first, and/or the AI difficulty, they may do so by clicking the 
+                    <b> Settings </b> button to make these changes.
+                </p>
+                
+                <p> If the user wishes to see the number of wins for each player, they can click the <b> Standings </b>
+                    button to view them. 
+                </p> 
+
+                <p> If the user wishes to consult the game rules and/or implementation features at any time, they 
+                    may do so by clicking the <b> Rules </b> button to see them.
+                </p>
+                
+                <p> If the user wishes to log in, they may do so by clicking the <b> Login </b>. </p>
+                    
+                <p> If the user wants to return to the game panel, they may do so clicking the <b> Play </b> button. </p>
+                
+                <br>
+
+                <p> During the game, the user will have four main buttons: </p>
+                
+                <ul>
+                    <li style = "margin-bottom: 20px;"> <b>Toggle Numbers On Board</b>: This button shows or hides 
+                        the numbers on the board (which represent the position of each piece). It helps to better 
+                        understand some of the messages (related to the piece movement) displayed on the left side 
+                        during gameplay.
+                    </li>
+
+                    <li style = "margin-bottom: 20px;"> <b>Forfeit</b>: This button allows the user to surrender the              
+                        game at any time, granting victory to the opponent automatically.
+                    </li>
+
+                    <li style = "margin-bottom: 20px;"> <b>Pass Turn</b>: This button is only active (clickable) when 
+                        the user has no possible moves and the dice value does not allow another roll. To assist the user, 
+                        a message will appear on the left-side message panel indicating that they should pass their turn.
+                    </li>
+
+                    <li style = "margin-bottom: 20px;"> <b>Roll Dice</b>: This button rolls the dice and generates a 
+                        value based on the number of the dice light faces facing up. It is only disabled (unclickable) 
+                        when it is the opponent's turn, or when, during the user's turn, the dice value allows a move 
+                        to be made and can't be rolled again.
+                    </li>
+                </ul>
+                
+
+                <br>
+
+                <p> When it is the user's turn to play, after rolling the dice, they must move a piece if there are 
+                    valid moves available. Hovering the cursor over one of their pieces will highlight its destination 
+                    space in green based on the dice value. Most of the time, clicking the piece will move it instantly 
+                    to the highlighted destination. In some cases though, a piece may have two possible moves (two green 
+                    destination spaces), in which case the user must first click the piece and then click the desired 
+                    destination space.
+                </p>
+
+                <br>
+
+                <p> To assist gameplay, there is a panel on the left side of the board displaying messages that track 
+                    the history of the game's turns.
+                </p>
+
+                <br>
+
+                <p> Additionally, a 2-second delay was added between the start of a turn and the dice roll, as well as 
+                    between the dice roll and the AI's move, to clearly display the dice result and the AI's moves.
+                </p>
+            
             </div>
-        </div>
+        </div> 
 
         <div id = "playScreen" class = "screenSize">
             <div id = "messagesArea">
@@ -81,7 +178,7 @@
 
                 <ol id = "messagesList"></ol>
                 
-                <button onclick = "toggleNumbers()" style = "width: 100%; margin: 0px; flex: 0 0 auto;"> Toggle Board Numbers </button>
+                <button id = "toggleBoardNumbersButton" onclick = "toggleNumbers()"> Toggle Board Numbers </button>
             </div>
 
             <div id = "boardArea"> 
@@ -109,7 +206,7 @@
                 <div id = "diceContent">
                     <div id = "diceCombinationValue"></div>
 
-                    <div id = "dices">
+                    <div id = "dice">
                         <div class = "dice" id = "dice1"></div>
                         <div class = "dice" id = "dice2"></div>
                         <div class = "dice" id = "dice3"></div>
