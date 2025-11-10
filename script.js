@@ -1,4 +1,4 @@
-let currentVisibleScreen = document.getElementById("playScreen");
+const currentVisibleScreen = document.getElementById("playScreen");
 let boardColumns = 9;
 let opponent = "AI";
 let whoRollsDiceFirst = "Player1";
@@ -230,7 +230,7 @@ class Game {
         // pinta o UI com base no estado atual do tabuleiro (quando chamada)
         for (let i = 0; i < this.board.array.length; i++) {
             let currentPiece = this.board.array[i];
-            let cellToPaint = document.getElementById(i);
+            const cellToPaint = document.getElementById(i);
 
             if (currentPiece != null) {
                 if (currentPiece.getOwner() == "Player1") {
@@ -247,7 +247,7 @@ class Game {
     toggleNumbersOnUI() {
         // adiciona ou remove números no tabuleiro quando chamada dependendo de numbersToggled
         for (let i = 0; i < this.board.array.length; i++) {
-            let cell = document.getElementById(i);
+            const cell = document.getElementById(i);
 
             if (numbersToggled) {
                 cell.textContent = i;
@@ -636,7 +636,7 @@ function getUserValidPiecesToMove() {
 
 function show(elementId) {
     // troca o ecrã / painél transitório visível
-    let screenToShow = document.getElementById(elementId);
+    const screenToShow = document.getElementById(elementId);
     currentVisibleScreen.style.display = "none";
     screenToShow.style.display = "flex";
     currentVisibleScreen = screenToShow;
@@ -649,7 +649,7 @@ function rollDice() {
 
     for (i = 1; i <= 4; i++) {
         let random = Math.floor(Math.random() * 2);
-        let dice = document.getElementById("dice" + i);
+        const dice = document.getElementById("dice" + i);
         value += random;
 
         if (random == 0) {
@@ -661,9 +661,9 @@ function rollDice() {
 
     if (value == 0) { value = 6; }
 
-    let updateValueDisplay = document.getElementById("diceCombinationValue");
+    const updateValueDisplay = document.getElementById("diceCombinationValue");
     updateValueDisplay.textContent = value;
-    let updatePlayName = document.getElementById("diceCombinationValueName");
+    const updatePlayName = document.getElementById("diceCombinationValueName");
     updatePlayName.textContent = diceValueName(value);
     
     latestDiceValue = value;
@@ -742,8 +742,8 @@ function passTurn() {
 }
 
 function login() {
-    let username = document.getElementById("usernameInput");
-    let password = document.getElementById("passwordInput");
+    const username = document.getElementById("usernameInput");
+    const password = document.getElementById("passwordInput");
 
     alert("Sorry '" + username.value + "', login functionality not yet implemented!");
 }
