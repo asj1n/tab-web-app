@@ -1,19 +1,19 @@
-var currentVisibleScreen = document.getElementById("playScreen");
-var boardColumns = 9;
-var opponent = "AI";
-var whoRollsDiceFirst = "Player1";
-var aiDifficultyLevel = "Easy";
-var player1Wins = 0;
-var player2Wins = 0;
-var aiWins = 0;
+let currentVisibleScreen = document.getElementById("playScreen");
+let boardColumns = 9;
+let opponent = "AI";
+let whoRollsDiceFirst = "Player1";
+let aiDifficultyLevel = "Easy";
+let player1Wins = 0;
+let player2Wins = 0;
+let aiWins = 0;
 
-var currentPlayer = whoRollsDiceFirst;
-var latestDiceValue = 0;
+let currentPlayer = whoRollsDiceFirst;
+let latestDiceValue = 0;
 
-var pieceWith2AlternativesSelected = false;
-var pieceWith2AlternativesId = null;
+let pieceWith2AlternativesSelected = false;
+let pieceWith2AlternativesId = null;
 
-var numbersToggled = false;
+let numbersToggled = false;
 
 const forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
 const startGameButtonArea = document.getElementById("startGameButtonArea");
@@ -311,7 +311,7 @@ class Game {
 }
 
 
-var game = new Game();
+let game = new Game();
 
 
 window.onload = () => {
