@@ -77,6 +77,144 @@ class Piece {
             }
         }
     }
+
+    getTargetPositions() {
+        if (this.owner == "Player1") {
+            return this.getUserTargetPositions();
+        } else {
+            return this.getAITargetPositions();
+        }
+    }
+
+    getAITargetPositions() {
+
+        let targetPositions = [];
+
+        let currentRow = Math.floor(this.getPosition() / boardColumns) + 1;
+
+        let targetPosition = this.getPosition() + latestDiceValue;
+
+        let targetRow = Math.floor(targetPosition / boardColumns) + 1;
+
+
+        // uma peça que esteja na última fila (4a do POV do AI, 1a fila do POV do utilizador) 
+        // só pode ser movida se o AI não tiver peças suas (da mesma cor) na fila inicial (1a fila do POV 
+        // do AI 4a do POV do utilizador) 
+        if (currentRow == 1) {
+            for (let i = 3 * boardColumns; i < 4 * boardColumns; i++) {
+                if (game.getBoard().getPieceOnPosition(i)?.getOwner() == "AI") {
+                    return targetPositions;
+                }
+            }
+        }
+
+        // se a linha em que a peça está coincidir com a fila na qual poderá calhar se o AI a jogar (não tem que mudar/saltar filas)
+        if (currentRow == targetRow) { 
+            // verificamos se essa posição não está ocupada por uma peça do próprio AI
+            // e verificamos o estado da peça (não pode mover-se se o estado é "neverMoved" e o valor do dado for diferente de 1)
+            if (game.getBoard().isPositionFree(targetPosition) || game.getBoard().getPieceOnPosition(targetPosition).getOwner() != currentPlayer) {
+                if (this.getState() == "neverMoved" && latestDiceValue == 1 || (this.getState() != "neverMoved")) {
+                    targetPositions.push(targetPosition);
+                }
+            }
+        // caso contrário, a linha da peça não coincide com a fila na qual poderá calhar (tem que mudar / saltar de fila)
+        } else { 
+            // se a fila em que a peça se encontra for diferente de 1 (1a fila / incial do POV do utilizador
+            // 4a / última fila do POV do AI), a peça tem a oportunidade de saltar para a fila de cima (para
+            // baixo do POV do utilzador).
+            if (currentRow != 1) {
+                let rowEndPosition = (currentRow) * boardColumns - 1;
+                let stepsToReachRowEnd = rowEndPosition - this.getPosition();
+                let secondTargetPosition = rowEndPosition - (2*boardColumns - 1) + (latestDiceValue - (stepsToReachRowEnd + 1)); 
+                
+                // verificamos se essa posição não está ocupada por uma peça do próprio utilizador
+                // e verificamos o estado da peça (não pode mover-se se o estado é "neverMoved" e o valor do dado for diferente de 1 ou
+                // se o seu estado é "hasBeenInFourthRow" e a peça está na 3a fila (do POV do utilizador))
+                if (game.getBoard().isPositionFree(secondTargetPosition) || game.getBoard().getPieceOnPosition(secondTargetPosition).getOwner() != currentPlayer) {
+                    if (!(this.getState() == "hasBeenInFourthRow" && currentRow == 2)) {
+                        if (this.getState() == "neverMoved" && latestDiceValue == 1 || (this.getState() != "neverMoved")) {
+                            targetPositions.push(secondTargetPosition);
+                        }
+                    }
+                }
+            }
+
+            // se a fila em que a peça se encontra for menor do que 3 do POV do utilizador (1a e 2a do POV do AI), 
+            // a peça tem oportunidade de saltar para a fila de baixo do POV do AI (cima do POV do utilizador)
+            if (currentRow < 3) {
+
+                // verificamos se essa posição não está ocupada por uma peça do próprio utilizador
+                if (game.getBoard().isPositionFree(targetPosition) || game.getBoard().getPieceOnPosition(targetPosition).getOwner() != currentPlayer) {
+                    targetPositions.push(targetPosition);
+                }
+            }
+        }
+
+        return targetPositions;
+    }
+
+    getUserTargetPositions() {
+
+        let targetPositions = [];
+
+        let currentRow = Math.floor(this.getPosition() / boardColumns) + 1;
+
+        let targetPosition = this.getPosition() + latestDiceValue;
+
+        let targetRow = Math.floor(targetPosition / boardColumns) + 1;
+
+        // uma peça que esteja na última fila (4a fila do POV do utilizador) só pode ser movida se
+        // o utilizador não tiver peças suas (da mesma cor) na fila inicial (1a fila do POV do utilizador) 
+        if (currentRow == 4) {
+            for (let i = 0; i < boardColumns; i++) {
+                if (game.getBoard().getPieceOnPosition(i)?.getOwner() == "Player1") {
+                    return targetPositions;
+                }
+            }
+        }
+
+        // se a linha em que a peça está coincidir com a fila na qual poderá calhar se o utilizador a jogar (não tem que mudar/saltar filas)
+        if (currentRow == targetRow) {
+            // verificamos se essa posição não está ocupada por uma peça do próprio utilizador
+            // e verificamos o estado da peça (não pode mover-se se o estado é "neverMoved" e o valor do dado for diferente de 1)
+            if (game.getBoard().isPositionFree(targetPosition) || game.getBoard().getPieceOnPosition(targetPosition).getOwner() != currentPlayer) {
+                if (this.getState() != "neverMoved" || (this.getState() == "neverMoved" && latestDiceValue == 1)) {
+                    targetPositions.push(targetPosition);
+                }
+            }
+        // caso contrário, a linha da peça não coincide com a fila na qual poderá calhar (tem que mudar / saltar de fila)
+        } else { 
+            // se a fila em que a peça se encontra for maior que 2 (fila 3 ou 4) do POV do utilizador, 
+            // a peça tem oportunidade de saltar para a fila de baixo
+            if (currentRow > 2) { 
+                let rowEndPosition = (currentRow) * boardColumns - 1;
+                let stepsToReachRowEnd = rowEndPosition - this.getPosition();
+                let secondTargetPosition = rowEndPosition - (2*boardColumns - 1) + (latestDiceValue - (stepsToReachRowEnd + 1)); 
+                
+                // verificamos se essa posição não está ocupada por uma peça do próprio utilizador
+                if (game.getBoard().isPositionFree(secondTargetPosition) || game.getBoard().getPieceOnPosition(secondTargetPosition).getOwner() != currentPlayer) {
+                    targetPositions.push(secondTargetPosition);
+                }
+            }
+
+            // se a fila em que a peça se encontra for diferente de 4 (última fila do POV do utilizador),
+            // a peça tem a oportunidade de saltar para a fila de cima.
+            if (currentRow != 4) {
+                // verificamos se essa posição não está ocupada por uma peça do próprio utilizador
+                // e verificamos o estado da peça (não pode mover-se se o estado é "neverMoved" e o valor do dado for diferente de 1 ou
+                // se o seu estado é "hasBeenInFourthRow" e a peça está na 3a fila (do POV do utilizador))
+                if (game.getBoard().isPositionFree(targetPosition) || game.getBoard().getPieceOnPosition(targetPosition).getOwner() != currentPlayer) {
+                    if (!(this.getState() == "hasBeenInFourthRow" && currentRow == 3)) {
+                        if (this.getState() != "neverMoved" || (this.getState() == "neverMoved" && latestDiceValue == 1)) {
+                            targetPositions.push(targetPosition);
+                        }
+                    }
+                }
+            }
+        }
+
+        return targetPositions;
+    }
 }
 
 class Board {
@@ -148,9 +286,10 @@ class Game {
 
                 cellPiece.addEventListener("mouseenter", (event) => {
                     let currPieceID = parseInt(event.target.id);
+                    let piece = game.getBoard().getPieceOnPosition(currPieceID);
 
                     if (currentPlayer == "Player1" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Player1") {
-                        let targetPositionsList = calculateUserTargetPositions(game.getBoard().getPieceOnPosition(currPieceID));
+                        let targetPositionsList = piece.getTargetPositions();
 
                         if (currPieceID != pieceWith2AlternativesId) { 
                             pieceWith2AlternativesId = null;
@@ -170,8 +309,10 @@ class Game {
 
                 cellPiece.addEventListener("mouseleave", (event) => {
                     let currPieceID = parseInt(event.target.id);
+                    let piece = game.getBoard().getPieceOnPosition(currPieceID);
+
                     if (currentPlayer == "Player1" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Player1") {
-                        let targetPositionsList = calculateUserTargetPositions(game.getBoard().getPieceOnPosition(currPieceID));
+                        let targetPositionsList = piece.getTargetPositions();
                         
                         if (!pieceWith2AlternativesSelected) {
                             cellPiece.style.transition = "transform 0.2s ease";
@@ -186,9 +327,10 @@ class Game {
 
                 cellPiece.addEventListener("click", (event) => {
                     let currPieceID = parseInt(event.target.id);
+                    let piece = this.board.getPieceOnPosition(currPieceID);
 
                     if (currentPlayer == "Player1" && this.board.getPieceOnPosition(currPieceID)?.owner == "Player1") {
-                        let possiblePositionsForUserMove = calculateUserTargetPositions(this.board.getPieceOnPosition(currPieceID));
+                        let possiblePositionsForUserMove = piece.getTargetPositions();
                         
                         if (possiblePositionsForUserMove.length != 0) {
                             if (possiblePositionsForUserMove.length == 2) {
@@ -205,7 +347,8 @@ class Game {
 
                     } else {
                         if (pieceWith2AlternativesSelected) {
-                            let selectedPieceTargetPositions = calculateUserTargetPositions(this.board.getPieceOnPosition(pieceWith2AlternativesId));
+                            let pieceWith2Alternatives = this.board.getPieceOnPosition(pieceWith2AlternativesId);
+                            let selectedPieceTargetPositions = pieceWith2Alternatives.getTargetPositions();
                             if (selectedPieceTargetPositions.includes(currPieceID)) {
                                 userMove(pieceWith2AlternativesId, currPieceID);
                             } else {
@@ -383,6 +526,36 @@ function userMove(selectedPieceId, targetPosition) {
     }
 }
 
+function getUserPiecesOnBoard() {
+    let userPiecesOnBoard = [];
+
+    for (let i = 0; i < 4 * boardColumns; i++) {
+        let piece = game.getBoard().getPieceOnPosition(i);
+        if (piece?.getOwner() == "Player1") {
+            userPiecesOnBoard.push(piece);
+        }
+    }
+
+    return userPiecesOnBoard;
+}
+
+function getUserValidPiecesToMove() {
+    // retorna uma lista de peças do utilizador que podem ser movidas com base no estado
+    // do jogo e no valor do latestDiceValue 
+    let userPiecesOnBoard = getUserPiecesOnBoard();
+    let userValidPiecesToMoveList = [];
+    
+    for (let piece of userPiecesOnBoard) {
+        let pieceTargetPositions = piece.getTargetPositions();
+
+        if (pieceTargetPositions.length > 0) {
+            userValidPiecesToMoveList.push(piece);
+        }
+    }
+
+    return userValidPiecesToMoveList;
+}
+
 function aiMove() {
     disableRollDiceButton();
     disablePassTurnButton();
@@ -419,7 +592,7 @@ function aiMove() {
         let randomSelectedPiece = validPiecesToMove[randomPieceIndex];
 
 
-        let selectedPiecePossibleMoves = calculateAITargetPositions(randomSelectedPiece);
+        let selectedPiecePossibleMoves = randomSelectedPiece.getTargetPositions();
         let randomMoveIndex = Math.floor(Math.random() * selectedPiecePossibleMoves.length);
         let randomChosenTarget = selectedPiecePossibleMoves[randomMoveIndex];
 
@@ -468,169 +641,15 @@ function getAIValidPiecesToMove() {
     let aiValidPiecesToMoveList = [];
 
     for (let piece of aiPiecesOnBoardList) {
-        let pieceTargetPositions = calculateAITargetPositions(piece);
+        let pieceTargetPositions = piece.getTargetPositions();
+
         if (pieceTargetPositions.length > 0) {
             aiValidPiecesToMoveList.push(piece);
         }
     }
     return aiValidPiecesToMoveList;
 }
-
-function calculateUserTargetPositions(piece) {
-
-    let targetPositions = [];
-
-    let currentRow = Math.floor(piece.getPosition() / boardColumns) + 1;
-
-    let targetPosition = piece.getPosition() + latestDiceValue;
-
-    let targetRow = Math.floor(targetPosition / boardColumns) + 1;
-
-    // uma peça que esteja na última fila (4a fila do POV do utilizador) só pode ser movida se
-    // o utilizador não tiver peças suas (da mesma cor) na fila inicial (1a fila do POV do utilizador) 
-    if (currentRow == 4) {
-        for (let i = 0; i < boardColumns; i++) {
-            if (game.getBoard().getPieceOnPosition(i)?.getOwner() == "Player1") {
-                return targetPositions;
-            }
-        }
-    }
-
-    // se a linha em que a peça está coincidir com a fila na qual poderá calhar se o utilizador a jogar (não tem que mudar/saltar filas)
-    if (currentRow == targetRow) {
-        // verificamos se essa posição não está ocupada por uma peça do próprio utilizador
-        // e verificamos o estado da peça (não pode mover-se se o estado é "neverMoved" e o valor do dado for diferente de 1)
-        if (game.getBoard().isPositionFree(targetPosition) || game.getBoard().getPieceOnPosition(targetPosition).getOwner() != currentPlayer) {
-            if (piece.getState() != "neverMoved" || (piece.getState() == "neverMoved" && latestDiceValue == 1)) {
-                targetPositions.push(targetPosition);
-            }
-        }
-    // caso contrário, a linha da peça não coincide com a fila na qual poderá calhar (tem que mudar / saltar de fila)
-    } else { 
-        // se a fila em que a peça se encontra for maior que 2 (fila 3 ou 4) do POV do utilizador, 
-        // a peça tem oportunidade de saltar para a fila de baixo
-        if (currentRow > 2) { 
-            let rowEndPosition = (currentRow) * boardColumns - 1;
-            let stepsToReachRowEnd = rowEndPosition - piece.getPosition();
-            let secondTargetPosition = rowEndPosition - (2*boardColumns - 1) + (latestDiceValue - (stepsToReachRowEnd + 1)); 
-            
-            // verificamos se essa posição não está ocupada por uma peça do próprio utilizador
-            if (game.getBoard().isPositionFree(secondTargetPosition) || game.getBoard().getPieceOnPosition(secondTargetPosition).getOwner() != currentPlayer) {
-                targetPositions.push(secondTargetPosition);
-            }
-        }
-
-        // se a fila em que a peça se encontra for diferente de 4 (última fila do POV do utilizador),
-        // a peça tem a oportunidade de saltar para a fila de cima.
-        if (currentRow != 4) {
-            // verificamos se essa posição não está ocupada por uma peça do próprio utilizador
-            // e verificamos o estado da peça (não pode mover-se se o estado é "neverMoved" e o valor do dado for diferente de 1 ou
-            // se o seu estado é "hasBeenInFourthRow" e a peça está na 3a fila (do POV do utilizador))
-            if (game.getBoard().isPositionFree(targetPosition) || game.getBoard().getPieceOnPosition(targetPosition).getOwner() != currentPlayer) {
-                if (!(piece.getState() == "hasBeenInFourthRow" && currentRow == 3)) {
-                    if (piece.getState() != "neverMoved" || (piece.getState() == "neverMoved" && latestDiceValue == 1)) {
-                        targetPositions.push(targetPosition);
-                    }
-                }
-            }
-        }
-    }
-
-    return targetPositions;
-}
-
-
-function calculateAITargetPositions(piece) {
-
-    let targetPositions = [];
-
-    let currentRow = Math.floor(piece.getPosition() / boardColumns) + 1;
-
-    let targetPosition = piece.getPosition() + latestDiceValue;
-
-    let targetRow = Math.floor(targetPosition / boardColumns) + 1;
-
-
-    // uma peça que esteja na última fila (4a do POV do AI, 1a fila do POV do utilizador) 
-    // só pode ser movida se o AI não tiver peças suas (da mesma cor) na fila inicial (1a fila do POV 
-    // do AI 4a do POV do utilizador) 
-    if (currentRow == 1) {
-        for (let i = 3 * boardColumns; i < 4 * boardColumns; i++) {
-            if (game.getBoard().getPieceOnPosition(i)?.getOwner() == "AI") {
-                return targetPositions;
-            }
-        }
-    }
-
-    // se a linha em que a peça está coincidir com a fila na qual poderá calhar se o AI a jogar (não tem que mudar/saltar filas)
-    if (currentRow == targetRow) { 
-        // verificamos se essa posição não está ocupada por uma peça do próprio AI
-        // e verificamos o estado da peça (não pode mover-se se o estado é "neverMoved" e o valor do dado for diferente de 1)
-        if (game.getBoard().isPositionFree(targetPosition) || game.getBoard().getPieceOnPosition(targetPosition).getOwner() != currentPlayer) {
-            if (piece.getState() == "neverMoved" && latestDiceValue == 1 || (piece.getState() != "neverMoved")) {
-                targetPositions.push(targetPosition);
-            }
-        }
-    // caso contrário, a linha da peça não coincide com a fila na qual poderá calhar (tem que mudar / saltar de fila)
-    } else { 
-        // se a fila em que a peça se encontra for diferente de 1 (1a fila / incial do POV do utilizador
-        // 4a / última fila do POV do AI), a peça tem a oportunidade de saltar para a fila de cima (para
-        // baixo do POV do utilzador).
-        if (currentRow != 1) {
-            let rowEndPosition = (currentRow) * boardColumns - 1;
-            let stepsToReachRowEnd = rowEndPosition - piece.getPosition();
-            let secondTargetPosition = rowEndPosition - (2*boardColumns - 1) + (latestDiceValue - (stepsToReachRowEnd + 1)); 
-            
-            // verificamos se essa posição não está ocupada por uma peça do próprio utilizador
-            // e verificamos o estado da peça (não pode mover-se se o estado é "neverMoved" e o valor do dado for diferente de 1 ou
-            // se o seu estado é "hasBeenInFourthRow" e a peça está na 3a fila (do POV do utilizador))
-            if (game.getBoard().isPositionFree(secondTargetPosition) || game.getBoard().getPieceOnPosition(secondTargetPosition).getOwner() != currentPlayer) {
-                if (!(piece.getState() == "hasBeenInFourthRow" && currentRow == 2)) {
-                    if (piece.getState() == "neverMoved" && latestDiceValue == 1 || (piece.getState() != "neverMoved")) {
-                        targetPositions.push(secondTargetPosition);
-                    }
-                }
-            }
-        }
-
-        // se a fila em que a peça se encontra for menor do que 3 do POV do utilizador (1a e 2a do POV do AI), 
-        // a peça tem oportunidade de saltar para a fila de baixo do POV do AI (cima do POV do utilizador)
-        if (currentRow < 3) {
-
-            // verificamos se essa posição não está ocupada por uma peça do próprio utilizador
-            if (game.getBoard().isPositionFree(targetPosition) || game.getBoard().getPieceOnPosition(targetPosition).getOwner() != currentPlayer) {
-                targetPositions.push(targetPosition);
-            }
-        }
-    }
-
-    return targetPositions;
-}
-
-function getUserValidPiecesToMove() {
-    // retorna uma lista de peças do utilizador que podem ser movidas com base no estado
-    // do jogo e no valor do latestDiceValue 
-    let userPiecesOnBoard = [];
-
-    for (let i = 0; i < 4 * boardColumns; i++) {
-        let piece = game.getBoard().getPieceOnPosition(i);
-        if (piece?.getOwner() == "Player1") {
-            userPiecesOnBoard.push(piece);
-        }
-    }
-
-    let userValidPiecesToMoveList = [];
-    
-    for (let piece of userPiecesOnBoard) {
-        let pieceTargetPositions = calculateUserTargetPositions(piece);
-
-        if (pieceTargetPositions.length > 0) {
-            userValidPiecesToMoveList.push(piece);
-        }
-    }
-
-    return userValidPiecesToMoveList;
-} 
+ 
 
 function show(elementId) {
     // troca o ecrã / painél transitório visível
