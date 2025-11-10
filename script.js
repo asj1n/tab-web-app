@@ -1,4 +1,4 @@
-const currentVisibleScreen = document.getElementById("playScreen");
+let currentVisibleScreen = document.getElementById("playScreen");
 let boardColumns = 9;
 let opponent = "AI";
 let whoRollsDiceFirst = "Player1";
