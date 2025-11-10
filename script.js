@@ -2,7 +2,6 @@ let currentVisibleScreen = document.getElementById("playScreen");
 let boardColumns = 9;
 let opponent = "AI";
 let whoRollsDiceFirst = "Player1";
-let aiDifficultyLevel = "Easy";
 let player1Wins = 0;
 let player2Wins = 0;
 let aiWins = 0;
@@ -318,7 +317,6 @@ window.onload = () => {
     console.log(game);
     console.log("Playing against: " + opponent);
     console.log("Rolls dice first: " + whoRollsDiceFirst);
-    console.log("AI Level: " + aiDifficultyLevel);
     currentVisibleScreen.style.display = "flex";
     disableRollDiceButton();
 }
@@ -758,7 +756,6 @@ function saveSettings() {
     boardColumns = document.getElementById("columnSelector").value;
     opponent = document.querySelector('input[name = "vs"]:checked').value;
     whoRollsDiceFirst = document.querySelector('input[name = "whoFirst"]:checked').value;
-    aiDifficultyLevel = document.querySelector('input[name = "aiLevel"]:checked').value;
     currentPlayer = whoRollsDiceFirst;
     
     clearMessages();
@@ -775,7 +772,6 @@ function saveSettings() {
     console.log(game);
     console.log("Playing against: " + opponent);
     console.log("Rolls dice first: " + whoRollsDiceFirst);
-    console.log("AI Level: " + aiDifficultyLevel);
     console.log("------------------------------------------------------------\n\n")
 }
 
