@@ -371,7 +371,7 @@ class Game {
     updatePiecesOnUI() {
         // pinta o UI com base no estado atual do tabuleiro (quando chamada)
         for (let i = 0; i < this.board.array.length; i++) {
-            let currentPiece = this.board.array[i];
+            let currentPiece = this.board.getPieceOnPosition(i);
             const cellToPaint = document.getElementById(i);
 
             if (currentPiece != null) {
@@ -456,13 +456,49 @@ class Game {
 let game = new Game();
 
 
-window.onload = () => {
+window.addEventListener("load", () => {
+    const showLoginScreenButton = document.getElementById("showLoginScreenButton");
+    showLoginScreenButton.addEventListener("click", () => show("loginScreen"));
+
+    const showRulesScreenButton = document.getElementById("showRulesScreenButton");
+    showRulesScreenButton.addEventListener("click", () => show("rulesScreen"));
+
+    const showPlayScreenButton = document.getElementById("showPlayScreenButton");
+    showPlayScreenButton.addEventListener("click", () => show("playScreen"));
+
+    const showStandingsScreenButton = document.getElementById("showStandingsScreenButton");
+    showStandingsScreenButton.addEventListener("click", () => { show('standingsScreen'); scores(); });
+
+    const showSettingsScreenButton = document.getElementById("showSettingsScreenButton");
+    showSettingsScreenButton.addEventListener("click", () => show("settingsScreen"));
+
+    const startGameButton = document.getElementById("startGameButton");
+    startGameButton.addEventListener("click", startGame);
+    
+    const toggleBoardNumbersButton = document.getElementById("toggleBoardNumbersButton"); 
+    toggleBoardNumbersButton.addEventListener("click", toggleNumbers);
+    
+    const loginUserButton = document.getElementById("loginUserButton");
+    loginUserButton.addEventListener("click", login);
+    
+    const forfeitButton = document.getElementById("forfeitButton");
+    forfeitButton.addEventListener("click", forfeit);
+
+    const passTurnButton = document.getElementById("passTurnButton");
+    passTurnButton.addEventListener("click", passTurn);
+
+    const rollDiceButton = document.getElementById("rollDiceButton");
+    rollDiceButton.addEventListener("click", rollDice);
+
+    const saveSettingsButton = document.getElementById("saveSettingsButton");
+    saveSettingsButton.addEventListener("click", saveSettings);
+
     console.log(game);
     console.log("Playing against: " + opponent);
     console.log("Rolls dice first: " + whoRollsDiceFirst);
     currentVisibleScreen.style.display = "flex";
     disableRollDiceButton();
-}
+});
 
 
 function disableRollDiceButton() {
@@ -591,7 +627,6 @@ function aiMove() {
         let randomPieceIndex = Math.floor(Math.random() * validPiecesToMove.length);
         let randomSelectedPiece = validPiecesToMove[randomPieceIndex];
 
-
         let selectedPiecePossibleMoves = randomSelectedPiece.getTargetPositions();
         let randomMoveIndex = Math.floor(Math.random() * selectedPiecePossibleMoves.length);
         let randomChosenTarget = selectedPiecePossibleMoves[randomMoveIndex];
@@ -649,7 +684,6 @@ function getAIValidPiecesToMove() {
     }
     return aiValidPiecesToMoveList;
 }
- 
 
 function show(elementId) {
     // troca o ecrã / painél transitório visível
