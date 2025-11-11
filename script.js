@@ -458,41 +458,26 @@ let game = new Game();
 
 
 window.addEventListener("load", () => {
-    const showLoginScreenButton = document.getElementById("showLoginScreenButton");
-    showLoginScreenButton.addEventListener("click", () => show("loginScreen"));
+    const callbacks = {
+        showLoginScreenButton: () => show("loginScreen"),
+        showRulesScreenButton: () => show("rulesScreen"),
+        showPlayScreenButton: () => show("playScreen"),
+        showStandingsScreenButton: () => show("standingsScreen"),
+        showSettingsScreenButton: () => show("settingsScreen"),
+        startGameButton: () => show("startGameButton"),
+        toggleBoardNumbersButton: () => show("toggleBoardNumbersButton"),
+        loginUserButton: () => show("loginUserButton"),
+        forfeitButton: () => show("forfeitButton"),
+        passTurnButton: () => show("passTurnButton"),
+        rollDiceButton: () => show("rollDiceButton"),
+        saveSettingsButton: () => show("saveSettingsButton")
+    }
 
-    const showRulesScreenButton = document.getElementById("showRulesScreenButton");
-    showRulesScreenButton.addEventListener("click", () => show("rulesScreen"));
-
-    const showPlayScreenButton = document.getElementById("showPlayScreenButton");
-    showPlayScreenButton.addEventListener("click", () => show("playScreen"));
-
-    const showStandingsScreenButton = document.getElementById("showStandingsScreenButton");
-    showStandingsScreenButton.addEventListener("click", () => { show('standingsScreen'); scores(); });
-
-    const showSettingsScreenButton = document.getElementById("showSettingsScreenButton");
-    showSettingsScreenButton.addEventListener("click", () => show("settingsScreen"));
-
-    const startGameButton = document.getElementById("startGameButton");
-    startGameButton.addEventListener("click", startGame);
-    
-    const toggleBoardNumbersButton = document.getElementById("toggleBoardNumbersButton"); 
-    toggleBoardNumbersButton.addEventListener("click", toggleNumbers);
-    
-    const loginUserButton = document.getElementById("loginUserButton");
-    loginUserButton.addEventListener("click", login);
-    
-    const forfeitButton = document.getElementById("forfeitButton");
-    forfeitButton.addEventListener("click", forfeit);
-
-    const passTurnButton = document.getElementById("passTurnButton");
-    passTurnButton.addEventListener("click", passTurn);
-
-    const rollDiceButton = document.getElementById("rollDiceButton");
-    rollDiceButton.addEventListener("click", rollDice);
-
-    const saveSettingsButton = document.getElementById("saveSettingsButton");
-    saveSettingsButton.addEventListener("click", saveSettings);
+    for (let id in callbacks) {
+           const el = document.getElementById(id);
+            if (el) el.addEventListener("click", callbacks[id]);
+            else console.warn(`Element with id "${id}" not found.`);
+    }
 
     console.log(game);
     console.log("Playing against: " + opponent);
