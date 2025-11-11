@@ -256,6 +256,7 @@ class Game {
         this.redPiecesLeft = boardColumns;
         this.generateBoardUI();
         this.updatePiecesOnUI();
+        this.toggleNumbersOnUI();
         this.updateRemainingPieces(null);
     }
 
