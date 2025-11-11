@@ -285,87 +285,13 @@ class Game {
                     cellPiece.id = (i + 1) * boardColumns - (j + 1);
                 }
 
-                cellPiece.addEventListener("mouseenter", (event) => {
-                    let currPieceID = parseInt(event.target.id);
-                    let piece = game.getBoard().getPieceOnPosition(currPieceID);
+                cellPiece.addEventListener("mouseenter", handleMouseEnter);
 
-                    if (currentPlayer == "Player1" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Player1") {
-                        let targetPositionsList = piece.getTargetPositions();
+                cellPiece.addEventListener("mouseleave", handleMouseLeave);
 
-                        if (currPieceID != pieceWith2AlternativesId) { 
-                            pieceWith2AlternativesId = null;
-                            pieceWith2AlternativesSelected = false;
-                            this.updatePiecesOnUI();
+                cellPiece.addEventListener("click", handleClick);
 
-                            cellPiece.style.transition = "transform 0.2s ease";
-                            cellPiece.style.transform = "scale(1.08)";
-
-                            for (let position of targetPositionsList) {
-                                let positionId = position.toString();
-                                const cellPosition = document.getElementById(positionId);
-                                cellPosition.style.backgroundColor = "rgba(11, 234, 26, 0.3)";
-                                cellPosition.style.border = "3px dotted rgba(2, 25, 3, 0.45)";
-                            }
-                        }
-                    }
-                });
-
-                cellPiece.addEventListener("mouseleave", (event) => {
-                    let currPieceID = parseInt(event.target.id);
-                    let piece = game.getBoard().getPieceOnPosition(currPieceID);
-
-                    if (currentPlayer == "Player1" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Player1") {
-                        let targetPositionsList = piece.getTargetPositions();
-                        
-                        if (!pieceWith2AlternativesSelected) {
-                            cellPiece.style.transition = "transform 0.2s ease";
-                            cellPiece.style.transform = "scale(1)";
-
-                            if (targetPositionsList.length != 0) {
-                                this.updatePiecesOnUI();
-                            }
-                        }
-                    }
-                });
-
-                cellPiece.addEventListener("click", (event) => {
-                    let currPieceID = parseInt(event.target.id);
-                    let piece = this.board.getPieceOnPosition(currPieceID);
-
-                    if (currentPlayer == "Player1" && this.board.getPieceOnPosition(currPieceID)?.owner == "Player1") {
-                        let possiblePositionsForUserMove = piece.getTargetPositions();
-                        
-                        if (possiblePositionsForUserMove.length != 0) {
-                            if (possiblePositionsForUserMove.length == 2) {
-                                pieceWith2AlternativesSelected = true;
-                                pieceWith2AlternativesId = currPieceID;
-                            } else {
-                                pieceWith2AlternativesSelected = false;
-                                pieceWith2AlternativesId = null;
-                                userMove(currPieceID, possiblePositionsForUserMove[0]);
-                            }
-                        } else {
-                            console.log("Piece " + currPieceID + " can't move.");
-                        }
-
-                    } else {
-                        if (pieceWith2AlternativesSelected) {
-                            let pieceWith2Alternatives = this.board.getPieceOnPosition(pieceWith2AlternativesId);
-                            let selectedPieceTargetPositions = pieceWith2Alternatives.getTargetPositions();
-                            if (selectedPieceTargetPositions.includes(currPieceID)) {
-                                userMove(pieceWith2AlternativesId, currPieceID);
-                            } else {
-                                console.log("Position clicked not within: ", selectedPieceTargetPositions);
-                            }
-                        } else {
-                            pieceWith2AlternativesSelected = false;
-                            pieceWith2AlternativesId = null;
-                            console.log("Invalid Selection");
-                        }
-                    }
-                });
-
-                cellBox.appendChild(cellPiece);;
+                cellBox.appendChild(cellPiece);
                 boardContainer.appendChild(cellBox);
             }
         }
@@ -488,6 +414,88 @@ window.addEventListener("load", () => {
     disableRollDiceButton();
 });
 
+function handleMouseEnter(event) {
+    let currPieceID = parseInt(event.target.id);
+    let piece = game.getBoard().getPieceOnPosition(currPieceID);
+
+    if (currentPlayer == "Player1" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Player1") {
+        let targetPositionsList = piece.getTargetPositions();
+
+        if (currPieceID != pieceWith2AlternativesId) { 
+            pieceWith2AlternativesId = null;
+            pieceWith2AlternativesSelected = false;
+            game.updatePiecesOnUI();
+
+            const cellPiece = event.target;
+            cellPiece.style.transition = "transform 0.2s ease";
+            cellPiece.style.transform = "scale(1.08)";
+
+            for (let position of targetPositionsList) {
+                let positionId = position.toString();
+                const cellPosition = document.getElementById(positionId);
+                cellPosition.style.backgroundColor = "rgba(11, 234, 26, 0.3)";
+                cellPosition.style.border = "3px dotted rgba(2, 25, 3, 0.45)";
+            }
+        }
+    }
+}
+
+function handleMouseLeave(event) {
+    let currPieceID = parseInt(event.target.id);
+    let piece = game.getBoard().getPieceOnPosition(currPieceID);
+
+    if (currentPlayer == "Player1" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Player1") {
+        let targetPositionsList = piece.getTargetPositions();
+        
+        if (!pieceWith2AlternativesSelected) {
+            const cellPiece = event.target;
+            cellPiece.style.transition = "transform 0.2s ease";
+            cellPiece.style.transform = "scale(1)";
+
+            if (targetPositionsList.length != 0) {
+                game.updatePiecesOnUI();
+            }
+        }
+    }
+}
+
+function handleClick(event) {
+    let currPieceID = parseInt(event.target.id);
+    let piece = game.getBoard().getPieceOnPosition(currPieceID);
+
+    if (currentPlayer == "Player1" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Player1") {
+        let possiblePositionsForUserMove = piece.getTargetPositions();
+        
+        if (possiblePositionsForUserMove.length != 0) {
+            if (possiblePositionsForUserMove.length == 2) {
+                pieceWith2AlternativesSelected = true;
+                pieceWith2AlternativesId = currPieceID;
+            } else {
+                pieceWith2AlternativesSelected = false;
+                pieceWith2AlternativesId = null;
+                userMove(currPieceID, possiblePositionsForUserMove[0]);
+            }
+        } else {
+            console.log("Piece " + currPieceID + " can't move.");
+        }
+
+    } else {
+        if (pieceWith2AlternativesSelected) {
+            let pieceWith2Alternatives = game.getBoard().getPieceOnPosition(pieceWith2AlternativesId);
+            let selectedPieceTargetPositions = pieceWith2Alternatives.getTargetPositions();
+            if (selectedPieceTargetPositions.includes(currPieceID)) {
+                userMove(pieceWith2AlternativesId, currPieceID);
+            } else {
+                console.log("Position clicked not within: ", selectedPieceTargetPositions);
+            }
+        } else {
+            pieceWith2AlternativesSelected = false;
+            pieceWith2AlternativesId = null;
+            console.log("Invalid Selection");
+        }
+    }
+}
+
 
 function disableRollDiceButton() {
     const diceButton = document.getElementById("rollDiceButton");
@@ -582,6 +590,7 @@ function getUserValidPiecesToMove() {
 
 function aiMove() {
     disableRollDiceButton();
+    disableForfeitButton();
     disablePassTurnButton();
 
     addNewMessage(currentPlayer + " it's your turn, please roll the dice");
@@ -605,6 +614,7 @@ function aiMove() {
                     currentPlayer = "Player1";
                     addNewMessage(currentPlayer + " it's your turn, please roll the dice");
                     enableRollDiceButton();
+                    enableForfeitButton();
                     disablePassTurnButton();
                 }
             }, 2000);
@@ -638,6 +648,7 @@ function aiMove() {
                 currentPlayer = "Player1";
                 addNewMessage(currentPlayer + " it's your turn, please roll the dice");
                 enableRollDiceButton();
+                enableForfeitButton();
                 disablePassTurnButton();
             }
         }, 2000);
