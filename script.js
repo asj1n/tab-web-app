@@ -463,18 +463,18 @@ let game = new Game();
 
 window.addEventListener("load", () => {
     const callbacks = {
-        "showLoginScreenButton": () => show("loginScreen"),
-        "showRulesScreenButton": () => show("rulesScreen"),
-        "showPlayScreenButton": () => show("playScreen"),
-        "showStandingsScreenButton": () => show("standingsScreen"),
-        "showSettingsScreenButton": () => show("settingsScreen"),
-        "toggleBoardNumbersButton": () => toggleNumbers(),
-        "startGameButton": () => startGame(),
-        "loginUserButton": () => login(),
-        "forfeitButton": () => forfeit(),
-        "passTurnButton": () => passTurn(),
-        "rollDiceButton": () => rollDice(),
-        "saveSettingsButton": () => saveSettings()
+        "showLoginScreenButton": () => { show("loginScreen"); },
+        "showRulesScreenButton": () => { show("rulesScreen"); },
+        "showPlayScreenButton": () => { show("playScreen"); },
+        "showStandingsScreenButton": () => { show("standingsScreen"); scores(); },
+        "showSettingsScreenButton": () => { show("settingsScreen"); },
+        "toggleBoardNumbersButton": () => { toggleNumbers(); },
+        "startGameButton": () => { startGame(); },
+        "loginUserButton": () => { login(); },
+        "forfeitButton": () => { forfeit(); },
+        "passTurnButton": () => { passTurn(); },
+        "rollDiceButton": () => { rollDice(); },
+        "saveSettingsButton": () => { saveSettings(); } 
     }
 
     for (let id in callbacks) {
