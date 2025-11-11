@@ -1,0 +1,15 @@
+#standingsScreen {
+  margin: 0;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+}
+
+.floatTextRightStandings {
+  float: right;
+}
+
+#standingsBox {
+	width: 15%;
+  text-align: left;
+}

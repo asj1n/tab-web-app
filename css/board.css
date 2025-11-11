@@ -1,0 +1,41 @@
+#boardArea {
+  flex: 1; /* takes up all leftover space */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; 
+}
+
+#boardContainer {
+  display: grid;
+  gap: 5px;
+  margin: 20px;
+  background: linear-gradient(to bottom, #F9D862 25%, #FAB549 50%, #F79A3A 75%, #F8842D 100%);
+  padding: 15px;
+  border-radius: 10px;
+  border: 3px solid orange;
+}
+
+.cellBox {
+  background-color: rgb(128, 59, 10);
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+}
+
+.cellPiece {
+  position: absolute;
+  transition: none;
+  width: 45px;
+  height: 45px;
+  border: 3px dotted rgb(190, 129, 94);
+  border-radius: 50%;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

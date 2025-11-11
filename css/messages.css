@@ -1,0 +1,61 @@
+#messagesArea {
+  width: 20%;
+  display: flex; 
+  flex-direction: column;
+  border-right: 2px solid;
+}
+
+#messagesTitle {
+  height: 15%;
+  border-bottom: 2px solid;
+  display: flex; 
+  flex: 0 0 auto;         
+  justify-content: center;
+  align-items: center;
+  font-size: x-large;
+  font-weight: bolder;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+#messagesList {
+  margin: 0;
+  padding: 10px;
+  list-style-type: decimal;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+#messagesList li {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  word-wrap: break-word;
+}
+
+#messagesList li.new-message {
+  background-color: #eae9e1;
+  font-weight: bold;
+  color: black;
+}
+
+#messagesList li.ai {
+  color: rgb(225, 59, 50);
+  font-weight: bolder;
+}
+
+#messagesList li.player1 {
+  color: #3ab0ff;
+  font-weight: bolder;
+}
+
+#messagesList li.new-message.ai {
+  background-color: rgb(225, 59, 50);
+  color: white;
+  font-weight: bolder;
+}
+
+#messagesList li.new-message.player1 {
+  background-color: #3ab0ff;
+  color: white;
+  font-weight: bolder;
+}

@@ -1,0 +1,22 @@
+.marginBottomSettings {
+  margin-bottom: 20px;
+}
+
+#settingsScreen {
+  margin: 0;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+}
+
+#settingsBox {
+	width: 20%;
+}
+
+#columnSelector {
+  width: 40px;
+}
+
+#saveSettingsButton {
+  margin-top: 20px;
+}

@@ -1,0 +1,23 @@
+.inputField {
+  width: 80%;
+  height: 20px;
+  border-radius: 5px;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: normal;
+}
+
+#loginScreen {
+  margin: 0;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+}
+
+#loginBox {
+	width: 15%;
+}
+
+#loginHr {
+  margin-top: 30px;
+  margin-bottom: 30px;
+}

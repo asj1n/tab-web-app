@@ -1,0 +1,11 @@
+#rulesScreen {
+  margin: 0;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+}
+
+#rulesBox {
+  margin-top: 25px;
+	width: 60%;	
+}
