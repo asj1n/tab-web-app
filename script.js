@@ -797,7 +797,10 @@ function saveSettings() {
     boardColumns = document.getElementById("columnSelector").value;
     opponent = document.querySelector('input[name = "vs"]:checked').value;
     whoRollsDiceFirst = document.querySelector('input[name = "whoFirst"]:checked').value;
-    currentPlayer = whoRollsDiceFirst;
+    
+    if (whoRollsDiceFirst == "Opponent") {
+        whoRollsDiceFirst = opponent;
+    }
     
     clearMessages();
     game = new Game();
@@ -858,8 +861,6 @@ function startGame() {
     clearMessages();
     
     game = new Game();
-
-    currentPlayer = whoRollsDiceFirst;
 
     if (whoRollsDiceFirst == "AI") {
         aiMove();
