@@ -10,10 +10,10 @@
     </head>
 
     <body>
-        <div id = "header" style = "display: flex; flex-direction: column;">
+        <div id = "header">
             <img alt = "Tâb" src = "assets/logo.png" height = 100>
 
-            <div style = "margin-top: 10px">
+            <div id = "headerButtonsArea">
                 <button id = "showLoginScreenButton"> Login </button>
                 <button id = "showRulesScreenButton"> Rules </button>            
                 <button id = "showPlayScreenButton"> Play </button>
@@ -37,7 +37,7 @@
                 <input id = "passwordInput" class = "inputField" type = "password">
                 
                 <br>
-                <hr style = "margin-top: 30px; margin-bottom: 30px;">
+                <hr id = "loginHr">
                 
                 <button id = "loginUserButton"> Sign In </button>
             </div>
@@ -45,7 +45,7 @@
 
         <div id = "rulesScreen" class = "screenSize">
             <div id = "rulesBox" class = "box">
-                <h1>GAME RULES</h1>
+                <h1> GAME RULES </h1>
                 
                 <hr>
 
@@ -124,22 +124,22 @@
                 <p> During the game, the user will have four main buttons: </p>
                 
                 <ul>
-                    <li style = "margin-bottom: 20px;"> <b>Toggle Numbers On Board</b>: This button shows or hides 
+                    <li><b>Toggle Numbers On Board</b>: This button shows or hides 
                         the numbers on the board (which represent the position of each piece). It helps to better 
                         understand some of the messages (related to the piece movement) displayed on the left side 
                         during gameplay.
                     </li>
 
-                    <li style = "margin-bottom: 20px;"> <b>Forfeit</b>: This button allows the user to surrender the              
+                    <li><b>Forfeit</b>: This button allows the user to surrender the              
                         game at any time, granting victory to the opponent automatically.
                     </li>
 
-                    <li style = "margin-bottom: 20px;"> <b>Pass Turn</b>: This button is only active (clickable) when 
+                    <li><b>Pass Turn</b>: This button is only active (clickable) when 
                         the user has no possible moves and the dice value does not allow another roll. To assist the user, 
                         a message will appear on the left-side message panel indicating that they should pass their turn.
                     </li>
 
-                    <li style = "margin-bottom: 20px;"> <b>Roll Dice</b>: This button rolls the dice and generates a 
+                    <li><b>Roll Dice</b>: This button rolls the dice and generates a 
                         value based on the number of the dice light faces facing up. It is only disabled (unclickable) 
                         when it is the opponent's turn, or when, during the user's turn, the dice value allows a move 
                         to be made and can't be rolled again.
@@ -183,18 +183,18 @@
 
             <div id = "boardArea"> 
                 <div id = "remainingPiecesArea" class = "box">
-                    <span id = "bluePiecesRemaining" class = "score" style = "color: #3ab0ff;"></span>
+                    <span id = "bluePiecesRemaining" class = "score"></span>
                     <span class = "dash"> - </span>
-                    <span id = "redPiecesRemaining" class="score" style = "color: rgb(225, 59, 50);"></span>
+                    <span id = "redPiecesRemaining" class = "score"></span>
                 </div>
 
                 <div id = "boardContainer"></div>
 
-                <div id = "startGameButtonArea" class = "boardButtonsArea" style = "display: flex; justify-content: center;">  
+                <div id = "startGameButtonArea" class = "boardButtonsArea">  
                     <button id = "startGameButton"> Start Game! </button>
                 </div>
 
-                <div id = "forfeitPassTurnButtonArea" class = "boardButtonsArea" style = "display: none; justify-content: center;">  
+                <div id = "forfeitPassTurnButtonArea" class = "boardButtonsArea">  
                     <button id = "forfeitButton"> Forfeit </button>
                     <button id = "passTurnButton"> Pass Turn </button>
                 </div>
@@ -222,36 +222,36 @@
 
         <div id = "standingsScreen" class = "screenSize">
             <div id = "standingsBox" class = "box">
-                <h1 style = "text-align: center;"> STANDINGS </h1>
+                <h1> STANDINGS </h1>
 
                 <hr>
                 
-                <p style = "text-align: left;">
+                <p>
                     <b> USER </b>
-                    <span style = "float: right;">
+                    <span class = "floatTextRightStandings">
                         <b> WINS </b>
                     </span>
                 </p>
                 
                 <hr>
                 
-                <p style = "text-align: left;">
+                <p>
                     PLAYER 1
-                    <span style = "float: right;">
+                    <span class = "floatTextRightStandings">
                         <span id = "player1"></span>
                     </span>
                 </p>
                 
-                <p style = "text-align: left;">
+                <p>
                     AI
-                    <span style = "float: right;">
+                    <span class = "floatTextRightStandings">
                         <span id = "ai"></span>
                     </span>
                 </p>
 
-                <p style = "text-align: left;">
-                    <s>PLAYER 2</s>
-                    <span style = "float: right;">
+                <p>
+                    PLAYER 2
+                    <span class = "floatTextRightStandings">
                         <span id = "player2"></span>
                     </span>
                 </p>
@@ -264,10 +264,10 @@
                 
                 <hr>    
                 
-                <div>
+                <div class = "marginBottomSettings">
                     <h4> Board size: </h4>
                     COLUMNS:&#9;
-                    <select id = "columnSelector" name = "boardColumnsSelector" style = "width: 40px;">
+                    <select id = "columnSelector" name = "boardColumnsSelector">
                         <option value = "7"> 7 </option>
                         <option value = "9"> 9 </option>
                         <option value = "11"> 11 </option>
@@ -278,7 +278,7 @@
 
                 <hr>
 
-                <div>
+                <div class = "marginBottomSettings">
                     <h4> Choose your opponent: </h4>
                     AI <input type = "radio" name = "vs" value = "AI" checked = "checked">&#9;
                     PLAYER 2 <input type = "radio" name = "vs" value = "Player2">        
@@ -286,7 +286,7 @@
 
                 <hr>
 
-                <div>
+                <div class = "marginBottomSettings">
                     <h4> Who rolls the dice first? </h4>
                     PLAYER 1 <input type = "radio" name = "whoFirst" value = "Player1" checked = "checked">&#9;
                     OPPONENT <input type = "radio" name = "whoFirst" value = "Opponent">
@@ -294,7 +294,7 @@
 
                 <hr>
 
-                <button id = "saveSettingsButton" style = "margin-top: 20px;"> Save </button>
+                <button id = "saveSettingsButton"> Save </button>
             </div>
         </div>        
     

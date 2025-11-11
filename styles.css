@@ -49,19 +49,31 @@ hr {
 	border: 0.5px solid white;
 }
 
+h1 {
+  text-align: center;
+}
+
 h3, h4 {
   margin-bottom: 10px;
 }
 
+li {
+  margin-bottom: 20px;
+}
 
 #header {
   height: 25%;
   width: 100%;
   border-bottom: 3px solid white;
   background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  display: flex;
+}
+
+#headerButtonsArea {
+  margin-top: 15px;
 }
 
 
@@ -100,6 +112,11 @@ h3, h4 {
 
 #loginBox {
 	width: 15%;
+}
+
+#loginHr {
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
 
 #rulesScreen {
@@ -189,7 +206,7 @@ h3, h4 {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 15px; /* space between items */
+  gap: 15px;
   font-size: 2rem;
   font-weight: bold;
   color: white;
@@ -205,6 +222,14 @@ h3, h4 {
   flex-direction: column;
   justify-content: center;
   align-items: center; 
+}
+
+#bluePiecesRemaining {
+  color: rgba(58, 176, 255);
+}
+
+#redPiecesRemaining {
+  color: rgb(225, 59, 50);
 }
 
 #boardContainer {
@@ -254,10 +279,20 @@ h3, h4 {
   font-size: medium;
 }
 
+#startGameButtonArea {
+  display: flex; 
+  justify-content: center;
+}
+
 #startGameButton {
   width: 23%;
   height: 80%;
   font-size: large;
+}
+
+#forfeitPassTurnButtonArea {
+   display: none; 
+  justify-content: center; 
 }
 
 #forfeitButton {
@@ -273,7 +308,6 @@ h3, h4 {
   font-size: large;
   margin-left: 15%;
 }
-
 
 .dice {
   width: 9%;
@@ -357,9 +391,18 @@ h3, h4 {
   justify-content: center;
 }
 
+.floatTextRightStandings {
+  float: right;
+}
+
 #standingsBox {
 	width: 15%;
   text-align: left;
+}
+
+
+.marginBottomSettings {
+  margin-bottom: 20px;
 }
 
 #settingsScreen {
@@ -371,4 +414,12 @@ h3, h4 {
 
 #settingsBox {
 	width: 20%;
+}
+
+#columnSelector {
+  width: 40px;
+}
+
+#saveSettingsButton {
+  margin-top: 20px;
 }
