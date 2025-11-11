@@ -58,22 +58,22 @@ class Piece {
         return this.owner;
     }
 
-    getColorBasedOnState() {
+    getBorderColorBasedOnState() {
         if (this.owner == "Player1") {
             if (this.state == "neverMoved") {
-                return "background-color: rgb(50, 91, 225); border: 3px solid rgba(181, 198, 252, 1);";
+                return "3px solid rgba(181, 198, 252, 1)";
             } else if (this.state == "neverBeenInFourthRow") {
-                return "background-color: rgb(50, 91, 225); border: 3px solid rgba(85, 123, 247, 1);";
+                return "3px solid rgba(85, 123, 247, 1)";
             }   else {
-                return "background-color: rgb(50, 91, 225); border: 3px solid rgba(0, 38, 163, 1);";
+                return "3px solid rgba(0, 38, 163, 1)";
             }
         } else {
             if (this.state == "neverMoved") {
-                return "background-color: rgb(225, 59, 50); border: 3px solid rgba(254, 201, 198, 1);";
+                return "3px solid rgba(254, 201, 198, 1)";
             } else if (this.state == "neverBeenInFourthRow") {
-                return "background-color: rgb(225, 59, 50); border: 3px solid rgba(252, 116, 109, 1);";
+                return "3px solid rgba(252, 116, 109, 1)";
             }   else {
-                return "background-color: rgb(225, 59, 50);; border: 3px solid rgba(157, 13, 6, 1);";
+                return "3px solid rgba(157, 13, 6, 1)";
             }
         }
     }
@@ -280,9 +280,9 @@ class Game {
                 cellPiece.classList.add('cellPiece');
 
                 if (isEvenRow) {
-                    cellPiece.setAttribute("id", i * boardColumns + j);
+                    cellPiece.id = i * boardColumns + j;
                 } else {
-                    cellPiece.setAttribute("id", (i + 1) * boardColumns - (j + 1));
+                    cellPiece.id = (i + 1) * boardColumns - (j + 1);
                 }
 
                 cellPiece.addEventListener("mouseenter", (event) => {
@@ -302,7 +302,9 @@ class Game {
 
                             for (let position of targetPositionsList) {
                                 let positionId = position.toString();
-                                document.getElementById(positionId).setAttribute("style", "background-color: rgba(11, 234, 26, 0.3); border: 3px dotted rgba(2, 25, 3, 0.45);")
+                                const cellPosition = document.getElementById(positionId);
+                                cellPosition.style.backgroundColor = "rgba(11, 234, 26, 0.3)";
+                                cellPosition.style.border = "3px dotted rgba(2, 25, 3, 0.45)";
                             }
                         }
                     }
@@ -377,12 +379,14 @@ class Game {
 
             if (currentPiece != null) {
                 if (currentPiece.getOwner() == "Player1") {
-                    cellToPaint.setAttribute("style", currentPiece.getColorBasedOnState());
+                    cellToPaint.style.backgroundColor = "rgb(50, 91, 225)";
+                    cellToPaint.style.border = currentPiece.getBorderColorBasedOnState();
                 } else {
-                    cellToPaint.setAttribute("style", currentPiece.getColorBasedOnState());
-                }
+                    cellToPaint.style.backgroundColor = "rgb(225, 59, 50)";
+                    cellToPaint.style.border = currentPiece.getBorderColorBasedOnState();                }
             } else {
-                cellToPaint.setAttribute("style", "background-color: transparent;");
+                cellToPaint.style.backgroundColor = "transparent";
+                cellToPaint.style.border = "3px dotted rgb(190, 129, 94)";
             }
         }
     }
@@ -459,24 +463,22 @@ let game = new Game();
 
 window.addEventListener("load", () => {
     const callbacks = {
-        showLoginScreenButton: () => show("loginScreen"),
-        showRulesScreenButton: () => show("rulesScreen"),
-        showPlayScreenButton: () => show("playScreen"),
-        showStandingsScreenButton: () => show("standingsScreen"),
-        showSettingsScreenButton: () => show("settingsScreen"),
-        startGameButton: () => show("startGameButton"),
-        toggleBoardNumbersButton: () => show("toggleBoardNumbersButton"),
-        loginUserButton: () => show("loginUserButton"),
-        forfeitButton: () => show("forfeitButton"),
-        passTurnButton: () => show("passTurnButton"),
-        rollDiceButton: () => show("rollDiceButton"),
-        saveSettingsButton: () => show("saveSettingsButton")
+        "showLoginScreenButton": () => show("loginScreen"),
+        "showRulesScreenButton": () => show("rulesScreen"),
+        "showPlayScreenButton": () => show("playScreen"),
+        "showStandingsScreenButton": () => show("standingsScreen"),
+        "showSettingsScreenButton": () => show("settingsScreen"),
+        "toggleBoardNumbersButton": () => toggleNumbers(),
+        "startGameButton": () => startGame(),
+        "loginUserButton": () => login(),
+        "forfeitButton": () => forfeit(),
+        "passTurnButton": () => passTurn(),
+        "rollDiceButton": () => rollDice(),
+        "saveSettingsButton": () => saveSettings()
     }
 
     for (let id in callbacks) {
-           const el = document.getElementById(id);
-            if (el) el.addEventListener("click", callbacks[id]);
-            else console.warn(`Element with id "${id}" not found.`);
+        document.getElementById(id).addEventListener("click", callbacks[id]);
     }
 
     console.log(game);
@@ -757,10 +759,10 @@ function willHaveToRollAgain(value) {
 function resetDice() {
     document.getElementById("diceCombinationValue").textContent = "";
     document.getElementById("diceCombinationValueName").textContent = "";
-    document.getElementById("dice1").setAttribute("style", "background-color: rgb(49, 26, 2)");
-    document.getElementById("dice2").setAttribute("style", "background-color: rgb(49, 26, 2)");
-    document.getElementById("dice3").setAttribute("style", "background-color: rgb(49, 26, 2)");
-    document.getElementById("dice4").setAttribute("style", "background-color: rgb(49, 26, 2)");
+    
+    for (let i = 1; i <= 4; i++) {
+        document.getElementById("dice" + i).style.backgroundColor = "rgb(49, 26, 2)";    
+    }
 }
 
 function forfeit() {
