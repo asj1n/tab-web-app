@@ -688,7 +688,7 @@ function rollDice() {
 
     disableRollDiceButton(); // previne que o jogador lance os dados novamente
 
-    for (i = 1; i <= 4; i++) {
+    for (let i = 1; i <= 4; i++) {
         let random = Math.floor(Math.random() * 2);
         const dice = document.getElementById("dice" + i);
         value += random;
