@@ -1,4 +1,4 @@
-let currentVisibleScreen = document.getElementById("playScreen");
+let currentVisibleScreen = document.getElementById("loginScreen");
 let boardColumns = 9;
 let opponent = "AI";
 let whoRollsDiceFirst = "Player1";
@@ -782,13 +782,6 @@ function passTurn() {
     aiMove();
 }
 
-function login() {
-    const username = document.getElementById("usernameInput");
-    const password = document.getElementById("passwordInput");
-
-    alert("Sorry '" + username.value + "', login functionality not yet implemented!");
-}
-
 function scores() {
     document.getElementById("player1").innerText = player1Wins;
     document.getElementById("ai").innerText = aiWins;
@@ -878,3 +871,129 @@ function startGame() {
     
     console.log("Start Game! button pressed");
 }
+
+
+/*
+==========================================================================================================================
+==========================================================================================================================
+==========================================    Server Connection    =======================================================
+==========================================================================================================================
+==========================================================================================================================
+*/
+
+// no futuro não poderá ser num const visto que teremos a opção do nosso em node.
+const server = ""
+
+const usernameField = document.getElementById("usernameInput");
+const passwordField = document.getElementById("passwordInput");
+
+
+let nick;
+let password;
+
+
+
+function buildServerURL(path) {
+    return server + path;
+}
+
+
+function login() {
+    if (usernameField.value == "" || passwordField.value == "") {
+        alert("Nick or Password fields empty");
+    } else {
+        nick = usernameField.value;
+        password = passwordField.value;
+        serverRegister();
+    }
+}
+
+function serverRegister() {    
+    fetch(buildServerURL("/register"), {
+        method: 'POST',
+        body: JSON.stringify({
+            nick: nick,
+            password: password
+        })
+    })
+    .then(response => 
+        response.json().then(json => ({ ok: response.ok, json }))
+    )
+    .then(({ ok, json }) => {
+        if (ok) {
+            console.clear();
+            console.log("Registing:\n • Nick: " + nick + "\n • Password: " + password + "\n • JSON: " + JSON.stringify(json));
+            serverJoin();
+        } else {
+            throw json;
+        }
+    })
+    .catch(error => console.log("Error during register: ", error));
+}
+
+
+let gameID;
+
+function serverJoin() {
+    fetch(buildServerURL("/join"), {
+        method: 'POST',
+        body: JSON.stringify({
+            group: 40,
+            nick: nick,
+            password: password,
+            size: boardColumns
+        })
+    })
+    .then(response => 
+        response.json().then(json => ({ ok: response.ok, json }))
+    )
+    .then(({ ok, json }) => {
+        if (ok) {
+            gameID = json.game;
+            console.log("Joining:\n • Nick: " + nick + "\n • Password: " + password + "\n • JSON: " + JSON.stringify(json));
+            serverUpdate();
+        } else {
+            throw json;
+        }
+    })
+    .catch(error => console.log("Error during join: ", error));
+}
+
+
+function serverLeave() {
+    fetch(buildServerURL("/leave"), {
+        method: 'POST',
+        body: JSON.stringify({
+            nick: nick,
+            password: password,
+            game: gameID
+        })
+    })
+    .then(response => 
+        response.json().then(json => ({ ok: response.ok, json }))
+    )
+    .then(({ ok, json }) => {
+        if (ok) {
+            console.log("Leaving:\n • Nick: " + nick + "\n • Password: " + password + "\n • JSON: " + JSON.stringify(json));
+        } else {
+            throw json;
+        }
+    })
+    .catch(error => console.log("Error during leave: ", error));
+}
+
+
+function serverUpdate() {
+    console.log("Created EventSource for update endpoint");
+    const eventSource = new EventSource(buildServerURL("/update?nick=" + nick + "&game=" + gameID));
+    eventSource.onmessage = function(event) {
+        console.log(event);
+        let message = JSON.parse(event.data);
+        console.log("Received /update message: " + JSON.stringify(message));
+
+        if ("winner" in message) {
+            eventSource.close();
+        }
+    }
+}
+
