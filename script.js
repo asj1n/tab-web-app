@@ -1,5 +1,5 @@
 let currentVisibleScreen = document.getElementById("loginScreen");
-let boardColumns = 9;
+let boardColumns = 7;
 let opponent = "AI";
 let whoRollsDiceFirst = "Player1";
 let player1Wins = 0;
@@ -891,12 +891,15 @@ const passwordField = document.getElementById("passwordInput");
 let nick;
 let password;
 
+let gameID;
+
+let nickColor;
+let cell; 
 
 
 function buildServerURL(path) {
     return server + path;
 }
-
 
 function login() {
     if (usernameField.value == "" || passwordField.value == "") {
@@ -922,7 +925,7 @@ function serverRegister() {
     .then(({ ok, json }) => {
         if (ok) {
             console.clear();
-            console.log("Registing:\n • Nick: " + nick + "\n • Password: " + password + "\n • JSON: " + JSON.stringify(json));
+            console.log("Registing:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
             serverJoin();
         } else {
             throw json;
@@ -930,9 +933,6 @@ function serverRegister() {
     })
     .catch(error => console.log("Error during register: ", error));
 }
-
-
-let gameID;
 
 function serverJoin() {
     fetch(buildServerURL("/join"), {
@@ -950,7 +950,7 @@ function serverJoin() {
     .then(({ ok, json }) => {
         if (ok) {
             gameID = json.game;
-            console.log("Joining:\n • Nick: " + nick + "\n • Password: " + password + "\n • JSON: " + JSON.stringify(json));
+            console.log("Joining:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
             serverUpdate();
         } else {
             throw json;
@@ -958,7 +958,6 @@ function serverJoin() {
     })
     .catch(error => console.log("Error during join: ", error));
 }
-
 
 function serverLeave() {
     fetch(buildServerURL("/leave"), {
@@ -974,7 +973,7 @@ function serverLeave() {
     )
     .then(({ ok, json }) => {
         if (ok) {
-            console.log("Leaving:\n • Nick: " + nick + "\n • Password: " + password + "\n • JSON: " + JSON.stringify(json));
+            console.log("Leaving:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
         } else {
             throw json;
         }
@@ -982,18 +981,114 @@ function serverLeave() {
     .catch(error => console.log("Error during leave: ", error));
 }
 
-
 function serverUpdate() {
     console.log("Created EventSource for update endpoint");
     const eventSource = new EventSource(buildServerURL("/update?nick=" + nick + "&game=" + gameID));
+    
     eventSource.onmessage = function(event) {
-        console.log(event);
-        let message = JSON.parse(event.data);
-        console.log("Received /update message: " + JSON.stringify(message));
+        let json = JSON.parse(event.data);
+        console.log("Received /update message: \n", json);
 
-        if ("winner" in message) {
+        if ("players" in json) {
+            nickColor = json.players[nick];
+
+            if (nickColor == "Blue") {
+                cell = boardColumns - 1;
+            } else {
+                cell = 4 * boardColumns - 1;
+            }
+        }
+
+        if ("winner" in json) {
             eventSource.close();
         }
     }
 }
 
+function serverRoll() {
+    fetch(buildServerURL("/roll"), {
+        method: 'POST',
+        body: JSON.stringify({
+            nick: nick,
+            password: password,
+            game: gameID
+        })
+    })
+    .then(response => 
+        response.json().then(json => ({ ok: response.ok, json }))
+    )
+    .then(({ ok, json }) => {
+        if (ok) {
+            console.log("Rolling:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
+        } else {
+            throw json;
+        }
+    })
+    .catch(error => console.log("Error during roll: ", error)); 
+}
+
+function serverPass() {
+    fetch(buildServerURL("/pass"), {
+        method: 'POST',
+        body: JSON.stringify({
+            nick: nick,
+            password: password,
+            game: gameID
+        })
+    })
+    .then(response => 
+        response.json().then(json => ({ ok: response.ok, json }))
+    )
+    .then(({ ok, json }) => {
+        if (ok) {
+            console.log("Passing:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
+        } else {
+            throw json;
+        }
+    })
+    .catch(error => console.log("Error during pass: ", error)); 
+}
+
+function serverNotify() {
+    fetch(buildServerURL("/notify"), {
+        method: 'POST',
+        body: JSON.stringify({
+            nick: nick,
+            password: password,
+            game: gameID,
+            cell: cell
+        })
+    })
+    .then(response => 
+        response.json().then(json => ({ ok: response.ok, json }))
+    )
+    .then(({ ok, json }) => {
+        if (ok) {
+            console.log("Notify:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
+        } else {
+            throw json;
+        }
+    })
+    .catch(error => console.log("Error during notify: ", error)); 
+}
+
+function serverRanking(testSize) {
+    fetch(buildServerURL("/ranking"), {
+        method: 'POST',
+        body: JSON.stringify({
+            group: 40,
+            size: testSize
+        })
+    })
+    .then(response => 
+        response.json().then(json => ({ ok: response.ok, json }))
+    )
+    .then(({ ok, json }) => {
+        if (ok) {
+            console.log("Ranking:\n", json);
+        } else {
+            throw json;
+        }
+    })
+    .catch(error => console.log("Error during ranking: ", error)); 
+}
