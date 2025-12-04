@@ -38,24 +38,35 @@
   color: black;
 }
 
-#messagesList li.ai {
+#messagesList li.red {
   color: rgb(225, 59, 50);
   font-weight: bolder;
 }
 
-#messagesList li.player1 {
-  color: #3ab0ff;
-  font-weight: bolder;
-}
-
-#messagesList li.new-message.ai {
+#messagesList li.new-message.red {
   background-color: rgb(225, 59, 50);
   color: white;
   font-weight: bolder;
 }
 
-#messagesList li.new-message.player1 {
+#messagesList li.blue {
+  color: #3ab0ff;
+  font-weight: bolder;
+}
+
+#messagesList li.new-message.blue {
   background-color: #3ab0ff;
+  color: white;
+  font-weight: bolder;
+}
+
+#messagesList li.yellow {
+  color: #face49;
+  font-weight: bolder;
+}
+
+#messagesList li.new-message.yellow {
+  background-color: #face49;
   color: white;
   font-weight: bolder;
 }
