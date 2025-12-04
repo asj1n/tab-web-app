@@ -1,6 +1,6 @@
 let currentVisibleScreen = document.getElementById("loginScreen");
 let boardColumns = 7;
-let opponent = "AI";
+let opponent = "Player2";
 let whoRollsDiceFirst = "Player1";
 let player1Wins = 0;
 let player2Wins = 0;
@@ -103,6 +103,24 @@ class Board {
     
     size() {
         return this.array.length;
+    }
+
+    mimicServerBoard() {
+        for (let i = 0; i < boardColumns; i++) {
+            if (nickColor == "Blue") {
+                this.array[i].owner = nick;
+            } else {
+                this.array[i].owner = opponentNick;
+            }
+        }
+
+        for (let i = 3 * boardColumns; i < 4 * boardColumns; i++) {
+            if (nickColor == "Red") {
+                this.array[i].owner = nick;
+            } else {
+                this.array[i].owner = opponentNick;
+            }
+        }
     }
 }
 
@@ -209,7 +227,7 @@ class Game {
 
     makeMove(selectedPieceId, targetPosition) {
         let targetPositionPiece = this.board.movePiece(selectedPieceId, targetPosition);
-        addNewMessage(currentPlayer + " moved piece in position " + selectedPieceId +" to " + targetPosition);
+        addNewMessage(currentPlayer + " moved piece in position " + selectedPieceId + " to " + targetPosition);
 
         if (targetPositionPiece != null) {
             addNewMessage(currentPlayer + " has captured a piece!");
@@ -241,6 +259,10 @@ class Game {
         const startGameButtonArea = document.getElementById("startGameButtonArea");
         forfeitPassTurnButtonArea.style.display = "none";
         startGameButtonArea.style.display = "flex";
+    }
+
+    mimicServerBoard() {
+        this.board.mimicServerBoard();
     }
 }
 
@@ -283,6 +305,9 @@ function handleMouseEnter(event) {
         let targetPositionsList = getUserTargetPositions(piece);
 
         if (currPieceID != pieceWith2AlternativesId) { 
+
+            // reduce scale first
+
             pieceWith2AlternativesId = null;
             pieceWith2AlternativesSelected = false;
             game.updatePiecesOnUI();
@@ -356,7 +381,6 @@ function handleClick(event) {
         }
     }
 }
-
 
 function disableRollDiceButton() {
     const diceButton = document.getElementById("rollDiceButton");
@@ -684,54 +708,58 @@ function show(elementId) {
 }
 
 function rollDice() {
-    let value = 0;
+    if (opponent == "Player2") {
+        serverRoll();
+    } else {
+        let value = 0;
 
-    disableRollDiceButton(); // previne que o jogador lance os dados novamente
+        disableRollDiceButton(); // previne que o jogador lance os dados novamente
 
-    for (let i = 1; i <= 4; i++) {
-        let random = Math.floor(Math.random() * 2);
-        const dice = document.getElementById("dice" + i);
-        value += random;
+        for (let i = 1; i <= 4; i++) {
+            let random = Math.floor(Math.random() * 2);
+            const dice = document.getElementById("dice" + i);
+            value += random;
 
-        if (random == 0) {
-            dice.style.backgroundColor = "rgb(49, 26, 2)";
-        } else {
-            dice.style.backgroundColor = "rgb(224, 167, 105)";
-        }
-    }
-
-    if (value == 0) { value = 6; }
-
-    const updateValueDisplay = document.getElementById("diceCombinationValue");
-    updateValueDisplay.textContent = value;
-    const updatePlayName = document.getElementById("diceCombinationValueName");
-    updatePlayName.textContent = diceValueName(value);
-    
-    latestDiceValue = value;
-
-    addNewMessage(diceValueName(latestDiceValue) + " " + currentPlayer + " rolled a " + latestDiceValue);
-
-    // se for o turno do utilizador, verificamos se este tem jogadas disponiveis ou se pode repetir o lançamento dos
-    // dados. Este segmento serve para ativar os butões PassTurn e Roll Dices consoante as opções do utilizador.
-    if (currentPlayer == "Player1") { 
-        let userValidPiecesToMoveList = getUserValidPiecesToMove();
-
-        if (userValidPiecesToMoveList.length > 0) {
-            disablePassTurnButton();
-        } else {
-            if (latestDiceValue == 4 || latestDiceValue == 6) {
-                console.log("User can roll dice again");
-                addNewMessage(currentPlayer + " it's your turn, please roll the dice");
-                disablePassTurnButton();
-
-                setTimeout(() => {
-                    resetDice();
-                    enableRollDiceButton();
-                }, 1000);
+            if (random == 0) {
+                dice.style.backgroundColor = "rgb(49, 26, 2)";
             } else {
-                console.log("User has no available moves, enabling PassTurn button")
-                addNewMessage(currentPlayer + " has no moves possible, please pass your turn");
-                enablePassTurnButton();
+                dice.style.backgroundColor = "rgb(224, 167, 105)";
+            }
+        }
+
+        if (value == 0) { value = 6; }
+
+        const updateValueDisplay = document.getElementById("diceCombinationValueDisplay");
+        updateValueDisplay.textContent = value;
+        const updatePlayName = document.getElementById("diceCombinationValueName");
+        updatePlayName.textContent = diceValueName(value);
+        
+        latestDiceValue = value;
+
+        addNewMessage(diceValueName(latestDiceValue) + " " + currentPlayer + " rolled a " + latestDiceValue);
+
+        // se for o turno do utilizador, verificamos se este tem jogadas disponiveis ou se pode repetir o lançamento dos
+        // dados. Este segmento serve para ativar os butões PassTurn e Roll Dices consoante as opções do utilizador.
+        if (currentPlayer == "Player1") { 
+            let userValidPiecesToMoveList = getUserValidPiecesToMove();
+
+            if (userValidPiecesToMoveList.length > 0) {
+                disablePassTurnButton();
+            } else {
+                if (latestDiceValue == 4 || latestDiceValue == 6) {
+                    console.log("User can roll dice again");
+                    addNewMessage(currentPlayer + " it's your turn, please roll the dice");
+                    disablePassTurnButton();
+
+                    setTimeout(() => {
+                        resetDice();
+                        enableRollDiceButton();
+                    }, 1000);
+                } else {
+                    console.log("User has no available moves, enabling PassTurn button")
+                    addNewMessage(currentPlayer + " has no moves possible, please pass your turn");
+                    enablePassTurnButton();
+                }
             }
         }
     }
@@ -759,7 +787,7 @@ function willHaveToRollAgain(value) {
 }
 
 function resetDice() {
-    document.getElementById("diceCombinationValue").textContent = "";
+    document.getElementById("diceCombinationValueDisplay").textContent = "";
     document.getElementById("diceCombinationValueName").textContent = "";
     
     for (let i = 1; i <= 4; i++) {
@@ -768,9 +796,13 @@ function resetDice() {
 }
 
 function forfeit() {
-    addNewMessage(currentPlayer + " has forfeited");
-    game.processWin(true);
-    console.log("Forfeit");
+    if (opponent == "Player2") {
+        serverLeave();
+    } else {
+        addNewMessage(currentPlayer + " has forfeited");
+        game.processWin(true);
+        console.log("Forfeit");
+    }
 }
 
 function passTurn() {
@@ -816,17 +848,21 @@ function saveSettings() {
     console.log("------------------------------------------------------------\n\n")
 }
 
-function addNewMessage(message) {
+function addNewMessage(message, color = null) {
     // adicionar mensagem à secção de mensagens do lado esquerdo
     const list = document.getElementById("messagesList");
     const li = document.createElement("li");
     li.textContent = message;
     li.classList.add("new-message");
 
-    if (currentPlayer == "Player1") {
-        li.classList.add("player1");
+    if (opponent == "Player2") {
+        li.classList.add(color.toLowerCase());
     } else {
-        li.classList.add("ai");
+        if (currentPlayer == "Player1") {
+            li.classList.add("blue");
+        } else {
+            li.classList.add("red");
+        }
     }
 
     list.insertBefore(li, list.firstChild);
@@ -849,27 +885,31 @@ function toggleNumbers() {
 }
 
 function startGame() {
+    console.log("Start Game! button pressed");
     const forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
     const startGameButtonArea = document.getElementById("startGameButtonArea");
     forfeitPassTurnButtonArea.style.display = "flex";
     startGameButtonArea.style.display = "none";
     
-    enableRollDiceButton();
-    disablePassTurnButton();
-    enableForfeitButton();
-    clearMessages();
-    
     game = new Game();
+    clearMessages();
 
-    currentPlayer = whoRollsDiceFirst;
-
-    if (whoRollsDiceFirst == "AI") {
-        aiMove();
+    if (opponent == "Player2") {
+        serverJoin();
+        disablePassTurnButton();
     } else {
-        addNewMessage(currentPlayer + " it's your turn, please roll the dice");
-    }
-    
-    console.log("Start Game! button pressed");
+        enableRollDiceButton();
+        disablePassTurnButton();
+        enableForfeitButton();
+
+        currentPlayer = whoRollsDiceFirst;
+
+        if (whoRollsDiceFirst == "AI") {
+            aiMove();
+        } else {
+            addNewMessage(currentPlayer + " it's your turn, please roll the dice");
+        }
+    }   
 }
 
 
@@ -894,45 +934,70 @@ let password;
 let gameID;
 
 let nickColor;
+let opponentNick;
+let opponentColor;
+
 let cell; 
+
+function getCurrentPlayerColor() {
+    if (currentPlayer == nick) {
+        return nickColor;
+    }
+    return opponentColor;
+}
+// let loggedIn = false;
 
 
 function buildServerURL(path) {
     return server + path;
 }
 
-function login() {
+async function login() {
     if (usernameField.value == "" || passwordField.value == "") {
         alert("Nick or Password fields empty");
     } else {
         nick = usernameField.value;
         password = passwordField.value;
-        serverRegister();
+        
+        const success = await serverRegister();
+        console.log(success);
+
+        if (success) {
+            show("playScreen");
+        } else {
+            alert("Error during registration");
+        }
     }
 }
 
-function serverRegister() {    
-    fetch(buildServerURL("/register"), {
-        method: 'POST',
-        body: JSON.stringify({
-            nick: nick,
-            password: password
-        })
-    })
-    .then(response => 
-        response.json().then(json => ({ ok: response.ok, json }))
-    )
-    .then(({ ok, json }) => {
-        if (ok) {
+async function serverRegister() {
+    try {
+        const response = await fetch(buildServerURL("/register"), {
+            method: 'POST',
+            body: JSON.stringify({
+                nick: nick,
+                password: password
+            })
+        });
+
+        const json = await response.json();
+
+        if (response.ok) {
             console.clear();
-            console.log("Registing:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
-            serverJoin();
+            console.log("Registering:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
+            // serverJoin();
+            return true;
         } else {
-            throw json;
+            console.log("Registering response not ok: ", json);
+            return false;
         }
-    })
-    .catch(error => console.log("Error during register: ", error));
+
+    } catch (error) {
+        console.log("Error during register: ", error);
+        return false;
+    }
 }
+
 
 function serverJoin() {
     fetch(buildServerURL("/join"), {
@@ -989,17 +1054,62 @@ function serverUpdate() {
         let json = JSON.parse(event.data);
         console.log("Received /update message: \n", json);
 
+        // setting up game
         if ("players" in json) {
             nickColor = json.players[nick];
+            opponentNick = Object.keys(json.players).find(key => key !== nick);
+            opponentColor = json.players[opponentNick];
 
             if (nickColor == "Blue") {
                 cell = boardColumns - 1;
             } else {
                 cell = 4 * boardColumns - 1;
+            }   
+            
+            enableForfeitButton();
+
+            if (json.turn == nick) {
+                currentPlayer = nick;
+                enableRollDiceButton();
+            } else {
+                currentPlayer = opponentNick;
+            }
+                
+            game.mimicServerBoard();
+            
+            console.log(game.getBoard());
+            console.log("Playing first: " + currentPlayer);
+            
+            addNewMessage("Connection established!", "yellow");
+            addNewMessage("Hello " + nick + "! You will play as " + nickColor, nickColor);
+        }
+
+        if ("dice" in json) {
+            document.getElementById("diceCombinationValueDisplay").textContent = json.dice.value;
+            let diceFaces = json.dice.stickValues;
+
+            for (let i = 1; i <= 4; i++) {
+                if (diceFaces[i]) {
+                    document.getElementById("dice" + i).style.backgroundColor = "rgb(224, 167, 105)";
+                } else {
+                    document.getElementById("dice" + i).style.backgroundColor = "rgb(49, 26, 2)";
+                }
             }
         }
 
         if ("winner" in json) {
+            if (json.winner != null) {
+                if (game.bluePiecesLeft != 0 && game.redPiecesLeft != 0) {
+                    if (json.winner == nick) {
+                        addNewMessage(opponentNick + " has forfeit and left the match", opponentColor);
+                        addNewMessage(nick + " won!", nickColor);
+                    } else {
+                        addNewMessage(nick + " has forfeit and left the match", nickColor);
+                        addNewMessage(opponentNick + " won!", opponentColor);
+                    }
+                }
+            }
+
             eventSource.close();
         }
     }
