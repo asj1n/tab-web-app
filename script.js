@@ -12,7 +12,7 @@ let latestDiceValue = 0;
 let pieceWith2AlternativesSelected = false;
 let pieceWith2AlternativesId = null;
 
-let numbersToggled = false;
+let numbersToggled = true;
 
 
 class Piece {
@@ -72,6 +72,27 @@ class Piece {
             }
         }
     }
+
+    getBorderColorBasedOnStatev2() {
+        console.log(this.owner + " " + bluePlayer);
+        if (this.owner == bluePlayer) {
+            if (this.state == "neverMoved") {
+                return "3px solid rgba(181, 198, 252, 1)";
+            } else if (this.state == "neverBeenInFourthRow") {
+                return "3px solid rgba(85, 123, 247, 1)";
+            }   else {
+                return "3px solid rgba(0, 38, 163, 1)";
+            }
+        } else {
+            if (this.state == "neverMoved") {
+                return "3px solid rgba(254, 201, 198, 1)";
+            } else if (this.state == "neverBeenInFourthRow") {
+                return "3px solid rgba(252, 116, 109, 1)";
+            }   else {
+                return "3px solid rgba(157, 13, 6, 1)";
+            }
+        }
+    }    
 }
 
 class Board {
@@ -184,7 +205,28 @@ class Game {
                     cellToPaint.style.border = currentPiece.getBorderColorBasedOnState();
                 } else {
                     cellToPaint.style.backgroundColor = "rgb(225, 59, 50)";
-                    cellToPaint.style.border = currentPiece.getBorderColorBasedOnState();                }
+                    cellToPaint.style.border = currentPiece.getBorderColorBasedOnState();                
+                }
+            } else {
+                cellToPaint.style.backgroundColor = "transparent";
+                cellToPaint.style.border = "3px dotted rgb(190, 129, 94)";
+            }
+        }
+    }
+
+    updatePiecesOnUIv2() {
+        for (let i = 0; i < this.board.size(); i++) {
+            let currentPiece = this.board.getPieceOnPosition(i);
+            const cellToPaint = document.getElementById(i);
+
+            if (currentPiece != null) {
+                if (currentPiece.getOwner() == bluePlayer) {
+                    cellToPaint.style.backgroundColor = "rgb(50, 91, 225)";
+                    cellToPaint.style.border = currentPiece.getBorderColorBasedOnStatev2();
+                } else {
+                    cellToPaint.style.backgroundColor = "rgb(225, 59, 50)";
+                    cellToPaint.style.border = currentPiece.getBorderColorBasedOnStatev2();                
+                }
             } else {
                 cellToPaint.style.backgroundColor = "transparent";
                 cellToPaint.style.border = "3px dotted rgb(190, 129, 94)";
@@ -709,61 +751,71 @@ function show(elementId) {
 
 function rollDice() {
     if (opponent == "Player2") {
-        serverRoll();
+        rollDiceVsPlayer2();
     } else {
-        let value = 0;
+        rollDiceVsAI();
+    }
+}   
 
-        disableRollDiceButton(); // previne que o jogador lance os dados novamente
+function rollDiceVsPlayer2() {
+    serverRoll();
+    disableRollDiceButton();
+}
 
-        for (let i = 1; i <= 4; i++) {
-            let random = Math.floor(Math.random() * 2);
-            const dice = document.getElementById("dice" + i);
-            value += random;
+function rollDiceVsAI() {
+    let value = 0;
 
-            if (random == 0) {
-                dice.style.backgroundColor = "rgb(49, 26, 2)";
-            } else {
-                dice.style.backgroundColor = "rgb(224, 167, 105)";
-            }
+    disableRollDiceButton(); // previne que o jogador lance os dados novamente
+
+    for (let i = 1; i <= 4; i++) {
+        let random = Math.floor(Math.random() * 2);
+        const dice = document.getElementById("dice" + i);
+        value += random;
+
+        if (random == 0) {
+            dice.style.backgroundColor = "rgb(49, 26, 2)";
+        } else {
+            dice.style.backgroundColor = "rgb(224, 167, 105)";
         }
+    }
 
-        if (value == 0) { value = 6; }
+    if (value == 0) { value = 6; }
 
-        const updateValueDisplay = document.getElementById("diceCombinationValueDisplay");
-        updateValueDisplay.textContent = value;
-        const updatePlayName = document.getElementById("diceCombinationValueName");
-        updatePlayName.textContent = diceValueName(value);
-        
-        latestDiceValue = value;
+    const updateValueDisplay = document.getElementById("diceCombinationValueDisplay");
+    updateValueDisplay.textContent = value;
+    const updatePlayName = document.getElementById("diceCombinationValueName");
+    updatePlayName.textContent = diceValueName(value);
+    
+    latestDiceValue = value;
 
-        addNewMessage(diceValueName(latestDiceValue) + " " + currentPlayer + " rolled a " + latestDiceValue);
+    addNewMessage(diceValueName(latestDiceValue) + " " + currentPlayer + " rolled a " + latestDiceValue);
 
-        // se for o turno do utilizador, verificamos se este tem jogadas disponiveis ou se pode repetir o lançamento dos
-        // dados. Este segmento serve para ativar os butões PassTurn e Roll Dices consoante as opções do utilizador.
-        if (currentPlayer == "Player1") { 
-            let userValidPiecesToMoveList = getUserValidPiecesToMove();
+    // se for o turno do utilizador, verificamos se este tem jogadas disponiveis ou se pode repetir o lançamento dos
+    // dados. Este segmento serve para ativar os butões PassTurn e Roll Dices consoante as opções do utilizador.
+    if (currentPlayer == "Player1") { 
+        let userValidPiecesToMoveList = getUserValidPiecesToMove();
 
-            if (userValidPiecesToMoveList.length > 0) {
+        if (userValidPiecesToMoveList.length > 0) {
+            disablePassTurnButton();
+        } else {
+            if (latestDiceValue == 4 || latestDiceValue == 6) {
+                console.log("User can roll dice again");
+                addNewMessage(currentPlayer + " it's your turn, please roll the dice");
                 disablePassTurnButton();
-            } else {
-                if (latestDiceValue == 4 || latestDiceValue == 6) {
-                    console.log("User can roll dice again");
-                    addNewMessage(currentPlayer + " it's your turn, please roll the dice");
-                    disablePassTurnButton();
 
-                    setTimeout(() => {
-                        resetDice();
-                        enableRollDiceButton();
-                    }, 1000);
-                } else {
-                    console.log("User has no available moves, enabling PassTurn button")
-                    addNewMessage(currentPlayer + " has no moves possible, please pass your turn");
-                    enablePassTurnButton();
-                }
+                setTimeout(() => {
+                    resetDice();
+                    enableRollDiceButton();
+                }, 1000);
+            } else {
+                console.log("User has no available moves, enabling PassTurn button")
+                addNewMessage(currentPlayer + " has no moves possible, please pass your turn");
+                enablePassTurnButton();
             }
         }
     }
-}   
+}
+
 
 function diceValueName(value) {
     switch (value) {
@@ -809,9 +861,13 @@ function passTurn() {
     console.clear();
     console.log("Turn Passed");
     resetDice();
-    addNewMessage(currentPlayer + " passed their turn");
-    currentPlayer = opponent;
-    aiMove();
+
+    if (opponent == "Player2") {
+        serverPass();
+    } else {
+        currentPlayer = opponent;
+        aiMove();
+    } 
 }
 
 function scores() {
@@ -890,6 +946,15 @@ function toggleNumbers() {
 
 function startGame() {
     console.log("Start Game! button pressed");
+    
+    if (opponent == "Player2") {
+        startGameVsPlayer2();
+    } else {
+        startGameVsAI();
+    }
+}
+
+function startGameVsAI() {
     const forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
     const startGameButtonArea = document.getElementById("startGameButtonArea");
     forfeitPassTurnButtonArea.style.display = "flex";
@@ -898,24 +963,37 @@ function startGame() {
     game = new Game();
     clearMessages();
 
-    if (opponent == "Player2") {
-        serverJoin();
-        disablePassTurnButton();
+    enableRollDiceButton();
+    disablePassTurnButton();
+    enableForfeitButton();
+
+    currentPlayer = whoRollsDiceFirst;
+
+    if (whoRollsDiceFirst == "AI") {
+        aiMove();
     } else {
-        enableRollDiceButton();
+        addNewMessage(currentPlayer + " it's your turn, please roll the dice");
+    }
+}
+
+function startGameVsPlayer2() {
+    if (nick == undefined || password == undefined) {
+            alert("You must register first in order to start a game against a second player.");
+    } else {
+        const forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
+        const startGameButtonArea = document.getElementById("startGameButtonArea");
+        forfeitPassTurnButtonArea.style.display = "flex";
+        startGameButtonArea.style.display = "none";
+
+        game = new Game();
+        clearMessages();
+
         disablePassTurnButton();
         enableForfeitButton();
 
-        currentPlayer = whoRollsDiceFirst;
-
-        if (whoRollsDiceFirst == "AI") {
-            aiMove();
-        } else {
-            addNewMessage(currentPlayer + " it's your turn, please roll the dice");
-        }
-    }   
+        serverJoin();
+    }
 }
-
 
 /*
 ==========================================================================================================================
@@ -940,8 +1018,11 @@ let gameID;
 let nickColor;
 let opponentNick;
 let opponentColor;
+let bluePlayer;
+let redPlayer;
 
-let cell; 
+
+let gameIsSetUp = false;
 
 function getCurrentPlayerColor() {
     if (currentPlayer == nick) {
@@ -950,16 +1031,17 @@ function getCurrentPlayerColor() {
     return opponentColor;
 }
 
-
 function setUpGame(players, turn) {
     nickColor = players[nick];
     opponentNick = Object.keys(players).find(key => key != nick);
     opponentColor = players[opponentNick];
 
     if (nickColor == "Blue") {
-        cell = boardColumns - 1;
+        bluePlayer = nick;
+        redPlayer = opponentNick;
     } else {
-        cell = 4 * boardColumns - 1;
+        bluePlayer = opponentNick;
+        redPlayer = nick;    
     }   
     
     enableForfeitButton();
@@ -978,9 +1060,10 @@ function setUpGame(players, turn) {
     
     addNewMessage("Connection established!", "yellow");
     addNewMessage("Hello " + nick + "! You will play as " + nickColor, nickColor);
+    gameIsSetUp = true;
 }
 
-function handleServerRollDice(stickValues, value) {
+function handleServerRollDice(stickValues, value, keepPlaying) {
     document.getElementById("diceCombinationValueDisplay").textContent = value;
     document.getElementById("diceCombinationValueName").textContent = diceValueName(value);
     addNewMessage(diceValueName(value) + " " + currentPlayer + " rolled a " + value);
@@ -992,7 +1075,31 @@ function handleServerRollDice(stickValues, value) {
             document.getElementById("dice" + i).style.backgroundColor = "rgb(49, 26, 2)";
         }
     }
+
+    if (!keepPlaying) {
+        addNewMessage(currentPlayer + " you have no moves available, please pass your turn");
+
+        if (currentPlayer == nick) {
+            enablePassTurnButton();            
+        }
+    }
 }
+
+
+function handleServerPassTurn(turn) {
+    addNewMessage(currentPlayer + " passed their turn");
+    resetDice();
+    disablePassTurnButton();
+    currentPlayer = turn;
+
+    if (currentPlayer != nick) {
+        disableRollDiceButton();
+    } else {
+        enableRollDiceButton();
+    }
+}
+
+
 
 function handleServerWinner(winner) {
     if (winner != null) {
@@ -1015,9 +1122,14 @@ function handleServerWinner(winner) {
                 addNewMessage(opponentNick + " won!", opponentColor);
             }
         }
+    } else {
+        // User left waiting queue. Make Start Game button reappear
+        const forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
+        const startGameButtonArea = document.getElementById("startGameButtonArea");
+        forfeitPassTurnButtonArea.style.display = "none";
+        startGameButtonArea.style.display = "flex";
     }
 }
-
 
 function buildServerURL(path) {
     return server + path;
@@ -1124,14 +1236,24 @@ function serverUpdate() {
     const eventSource = new EventSource(buildServerURL("/update?nick=" + nick + "&game=" + gameID));
     eventSource.addEventListener("message", (message) => {       
         let json = JSON.parse(message.data);
+        console.clear();
         console.log("Received /update message: \n", json);
 
-        if ("players" in json) {
+        if (!gameIsSetUp && "players" in json) {
             setUpGame(json.players, json.turn);
         }
 
         if ("dice" in json) {
-            handleServerRollDice(json.dice.stickValues, json.dice.value);
+            if (json.dice != null) {
+                handleServerRollDice(json.dice.stickValues, json.dice.value, json.dice.keepPlaying);
+            } else {
+                handleServerPassTurn(json.turn);
+            }
+        }
+
+        if ("step" in json && "selected" in json && json.step == "from") {
+            game.getBoard().movePiece(json.selected[0], json.selected[1]);
+            game.updatePiecesOnUIv2();
         }
 
         if ("winner" in json) {
@@ -1167,7 +1289,7 @@ async function serverRoll() {
 
 async function serverPass() {
     try {
-        const response = await fetch(buildServerURL("/roll"), {
+        const response = await fetch(buildServerURL("/pass"), {
             method: 'POST',
             body: JSON.stringify({
                 nick: nick,
@@ -1189,7 +1311,7 @@ async function serverPass() {
     }
 }
 
-async function serverNotify() {
+async function serverNotify(selectedCell) {
     try {
         const response = await fetch(buildServerURL("/notify"), {
             method: 'POST',
@@ -1197,7 +1319,7 @@ async function serverNotify() {
                 nick: nick,
                 password: password,
                 game: gameID,
-                cell: cell
+                cell: selectedCell
             })
         });
 
@@ -1236,4 +1358,3 @@ async function serverRanking(testSize) {
         console.log("Error during ranking: ", error);
     }
 }
-
