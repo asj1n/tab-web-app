@@ -856,7 +856,11 @@ function addNewMessage(message, color = null) {
     li.classList.add("new-message");
 
     if (opponent == "Player2") {
-        li.classList.add(color.toLowerCase());
+        if (color != null) {
+            li.classList.add(color.toLowerCase());
+        } else {
+            li.classList.add(getCurrentPlayerColor().toLowerCase());
+        }
     } else {
         if (currentPlayer == "Player1") {
             li.classList.add("blue");
@@ -945,7 +949,74 @@ function getCurrentPlayerColor() {
     }
     return opponentColor;
 }
-// let loggedIn = false;
+
+
+function setUpGame(players, turn) {
+    nickColor = players[nick];
+    opponentNick = Object.keys(players).find(key => key != nick);
+    opponentColor = players[opponentNick];
+
+    if (nickColor == "Blue") {
+        cell = boardColumns - 1;
+    } else {
+        cell = 4 * boardColumns - 1;
+    }   
+    
+    enableForfeitButton();
+
+    if (turn == nick) {
+        currentPlayer = nick;
+        enableRollDiceButton();
+    } else {
+        currentPlayer = opponentNick;
+    }
+        
+    game.mimicServerBoard();
+    
+    console.log(game.getBoard());
+    console.log("Playing first: " + currentPlayer);
+    
+    addNewMessage("Connection established!", "yellow");
+    addNewMessage("Hello " + nick + "! You will play as " + nickColor, nickColor);
+}
+
+function handleServerRollDice(stickValues, value) {
+    document.getElementById("diceCombinationValueDisplay").textContent = value;
+    document.getElementById("diceCombinationValueName").textContent = diceValueName(value);
+    addNewMessage(diceValueName(value) + " " + currentPlayer + " rolled a " + value);
+
+    for (let i = 1; i <= 4; i++) {
+        if (stickValues[i]) {
+            document.getElementById("dice" + i).style.backgroundColor = "rgb(224, 167, 105)";
+        } else {
+            document.getElementById("dice" + i).style.backgroundColor = "rgb(49, 26, 2)";
+        }
+    }
+}
+
+function handleServerWinner(winner) {
+    if (winner != null) {
+        if (game.bluePiecesLeft != 0 && game.redPiecesLeft != 0) {
+            // One of the players has forfeit
+            if (winner == nick) {
+                addNewMessage(opponentNick + " has forfeit and left the match", opponentColor);
+                addNewMessage(nick + " won!", nickColor);
+            } else {
+                addNewMessage(nick + " has forfeit and left the match", nickColor);
+                addNewMessage(opponentNick + " won!", opponentColor);
+            }
+        } else {
+            // One of the players has no remaining pieces (lost)
+            if (winner == nick) {
+                addNewMessage(opponentNick + " has no remaining pieces left", opponentColor);
+                addNewMessage(nick + " won!", nickColor);
+            } else {
+                addNewMessage(nick + "  has no remaining pieces left", nickColor);
+                addNewMessage(opponentNick + " won!", opponentColor);
+            }
+        }
+    }
+}
 
 
 function buildServerURL(path) {
@@ -985,10 +1056,9 @@ async function serverRegister() {
         if (response.ok) {
             console.clear();
             console.log("Registering:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
-            // serverJoin();
             return true;
         } else {
-            console.log("Registering response not ok: ", json);
+            console.log("Registering response not OK: ", json);
             return false;
         }
 
@@ -998,207 +1068,172 @@ async function serverRegister() {
     }
 }
 
+async function serverJoin() {
+    try {
+        const response = await fetch(buildServerURL("/join"), {
+            method: 'POST',
+            body: JSON.stringify({
+                group: 40,
+                nick: nick,
+                password: password,
+                size: boardColumns
+            })
+        });
 
-function serverJoin() {
-    fetch(buildServerURL("/join"), {
-        method: 'POST',
-        body: JSON.stringify({
-            group: 40,
-            nick: nick,
-            password: password,
-            size: boardColumns
-        })
-    })
-    .then(response => 
-        response.json().then(json => ({ ok: response.ok, json }))
-    )
-    .then(({ ok, json }) => {
-        if (ok) {
+        const json = await response.json();
+
+        if (response.ok) {
             gameID = json.game;
             console.log("Joining:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
             serverUpdate();
         } else {
-            throw json;
+            console.log("Joining response not OK:", json);
         }
-    })
-    .catch(error => console.log("Error during join: ", error));
+
+    } catch (error) {
+        console.log("Error during join: ", error);
+    }
 }
 
-function serverLeave() {
-    fetch(buildServerURL("/leave"), {
+async function serverLeave() {
+    try {
+    const response = await fetch(buildServerURL("/leave"), {
         method: 'POST',
         body: JSON.stringify({
             nick: nick,
             password: password,
             game: gameID
         })
-    })
-    .then(response => 
-        response.json().then(json => ({ ok: response.ok, json }))
-    )
-    .then(({ ok, json }) => {
-        if (ok) {
-            console.log("Leaving:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
-        } else {
-            throw json;
-        }
-    })
-    .catch(error => console.log("Error during leave: ", error));
+    });
+
+    const json = await response.json();
+
+    if (response.ok) {
+        console.log("Leaving:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
+    } else {
+        console.log("Leaving response not OK:", json);
+    }
+
+    } catch (error) {
+        console.log("Error during leave: ", error);
+    }
 }
 
 function serverUpdate() {
     console.log("Created EventSource for update endpoint");
     const eventSource = new EventSource(buildServerURL("/update?nick=" + nick + "&game=" + gameID));
-    
-    eventSource.onmessage = function(event) {
-        let json = JSON.parse(event.data);
+    eventSource.addEventListener("message", (message) => {       
+        let json = JSON.parse(message.data);
         console.log("Received /update message: \n", json);
 
-        // setting up game
         if ("players" in json) {
-            nickColor = json.players[nick];
-            opponentNick = Object.keys(json.players).find(key => key !== nick);
-            opponentColor = json.players[opponentNick];
-
-            if (nickColor == "Blue") {
-                cell = boardColumns - 1;
-            } else {
-                cell = 4 * boardColumns - 1;
-            }   
-            
-            enableForfeitButton();
-
-            if (json.turn == nick) {
-                currentPlayer = nick;
-                enableRollDiceButton();
-            } else {
-                currentPlayer = opponentNick;
-            }
-                
-            game.mimicServerBoard();
-            
-            console.log(game.getBoard());
-            console.log("Playing first: " + currentPlayer);
-            
-            addNewMessage("Connection established!", "yellow");
-            addNewMessage("Hello " + nick + "! You will play as " + nickColor, nickColor);
+            setUpGame(json.players, json.turn);
         }
 
         if ("dice" in json) {
-            document.getElementById("diceCombinationValueDisplay").textContent = json.dice.value;
-            let diceFaces = json.dice.stickValues;
-
-            for (let i = 1; i <= 4; i++) {
-                if (diceFaces[i]) {
-                    document.getElementById("dice" + i).style.backgroundColor = "rgb(224, 167, 105)";
-                } else {
-                    document.getElementById("dice" + i).style.backgroundColor = "rgb(49, 26, 2)";
-                }
-            }
+            handleServerRollDice(json.dice.stickValues, json.dice.value);
         }
 
         if ("winner" in json) {
-            if (json.winner != null) {
-                if (game.bluePiecesLeft != 0 && game.redPiecesLeft != 0) {
-                    if (json.winner == nick) {
-                        addNewMessage(opponentNick + " has forfeit and left the match", opponentColor);
-                        addNewMessage(nick + " won!", nickColor);
-                    } else {
-                        addNewMessage(nick + " has forfeit and left the match", nickColor);
-                        addNewMessage(opponentNick + " won!", opponentColor);
-                    }
-                }
-            }
-
+            handleServerWinner(json.winner);
             eventSource.close();
+        }     
+    });
+}
+
+async function serverRoll() {
+    try {
+        const response = await fetch(buildServerURL("/roll"), {
+            method: 'POST',
+            body: JSON.stringify({
+                nick: nick,
+                password: password,
+                game: gameID
+            })
+        });
+
+        const json = await response.json();
+
+        if (response.ok) {
+            console.log("Rolling:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
+        } else {
+            console.log("Rolling response not OK:", json);
         }
+
+    } catch (error) {
+        console.log("Error during roll: ", error);
     }
 }
 
-function serverRoll() {
-    fetch(buildServerURL("/roll"), {
-        method: 'POST',
-        body: JSON.stringify({
-            nick: nick,
-            password: password,
-            game: gameID
-        })
-    })
-    .then(response => 
-        response.json().then(json => ({ ok: response.ok, json }))
-    )
-    .then(({ ok, json }) => {
-        if (ok) {
-            console.log("Rolling:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
-        } else {
-            throw json;
-        }
-    })
-    .catch(error => console.log("Error during roll: ", error)); 
-}
+async function serverPass() {
+    try {
+        const response = await fetch(buildServerURL("/roll"), {
+            method: 'POST',
+            body: JSON.stringify({
+                nick: nick,
+                password: password,
+                game: gameID
+            })
+        });
 
-function serverPass() {
-    fetch(buildServerURL("/pass"), {
-        method: 'POST',
-        body: JSON.stringify({
-            nick: nick,
-            password: password,
-            game: gameID
-        })
-    })
-    .then(response => 
-        response.json().then(json => ({ ok: response.ok, json }))
-    )
-    .then(({ ok, json }) => {
-        if (ok) {
+        const json = await response.json();
+
+        if (response.ok) {
             console.log("Passing:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
         } else {
-            throw json;
+            console.log("Passing response not OK:", json);
         }
-    })
-    .catch(error => console.log("Error during pass: ", error)); 
+
+    } catch (error) {
+        console.log("Error during pass: ", error);
+    }
 }
 
-function serverNotify() {
-    fetch(buildServerURL("/notify"), {
-        method: 'POST',
-        body: JSON.stringify({
-            nick: nick,
-            password: password,
-            game: gameID,
-            cell: cell
-        })
-    })
-    .then(response => 
-        response.json().then(json => ({ ok: response.ok, json }))
-    )
-    .then(({ ok, json }) => {
-        if (ok) {
+async function serverNotify() {
+    try {
+        const response = await fetch(buildServerURL("/notify"), {
+            method: 'POST',
+            body: JSON.stringify({
+                nick: nick,
+                password: password,
+                game: gameID,
+                cell: cell
+            })
+        });
+
+        const json = await response.json();
+
+        if (response.ok) {
             console.log("Notify:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
         } else {
-            throw json;
+            console.log("Notify response not OK:", json);
         }
-    })
-    .catch(error => console.log("Error during notify: ", error)); 
+
+    } catch (error) {
+        console.log("Error during notify: ", error);
+    }
 }
 
-function serverRanking(testSize) {
-    fetch(buildServerURL("/ranking"), {
-        method: 'POST',
-        body: JSON.stringify({
-            group: 40,
-            size: testSize
-        })
-    })
-    .then(response => 
-        response.json().then(json => ({ ok: response.ok, json }))
-    )
-    .then(({ ok, json }) => {
-        if (ok) {
+async function serverRanking(testSize) {
+    try {
+        const response = await fetch(buildServerURL("/ranking"), {
+            method: 'POST',
+            body: JSON.stringify({
+                group: 40,
+                size: testSize,
+            })
+        });
+
+        const json = await response.json();
+
+        if (response.ok) {
             console.log("Ranking:\n", json);
         } else {
-            throw json;
+            console.log("Rolling response not OK:", json);
         }
-    })
-    .catch(error => console.log("Error during ranking: ", error)); 
+
+    } catch (error) {
+        console.log("Error during ranking: ", error);
+    }
 }
+
