@@ -1,7 +1,7 @@
 let currentVisibleScreen = document.getElementById("loginScreen");
 let boardColumns = 7;
 let opponent = "Player2";
-let whoRollsDiceFirst = "Player1";
+let whoRollsDiceFirst = "Blue";
 let player1Wins = 0;
 let player2Wins = 0;
 let aiWins = 0;
@@ -41,9 +41,9 @@ class Piece {
         if (this.state != "hasBeenInFourthRow") {
             if (this.state == "neverMoved") {
                 this.state = "neverBeenInFourthRow";
-            } else if (positionRow == 4 && this.owner == "Player1") {
+            } else if (positionRow == 4 && this.owner == "Blue") {
                 this.state = "hasBeenInFourthRow";
-            } else if (positionRow == 1 && this.owner == opponent) {
+            } else if (positionRow == 1 && this.owner == "Red") {
                 this.state = "hasBeenInFourthRow";
             }
         }
@@ -54,7 +54,7 @@ class Piece {
     }
 
     getBorderColorBasedOnState() {
-        if (this.owner == "Player1") {
+        if (this.owner == "Blue") {
             if (this.state == "neverMoved") {
                 return "3px solid rgba(181, 198, 252, 1)";
             } else if (this.state == "neverBeenInFourthRow") {
@@ -98,8 +98,8 @@ class Piece {
 class Board {
     constructor() {
         this.array = new Array(boardColumns * 4).fill(null);
-        for (let i = 0 ; i < boardColumns; i++) { this.array[i] = new Piece(i, "Player1"); }
-        for (let i = 3 * boardColumns; i < 4 * boardColumns; i++) { this.array[i] = new Piece(i, opponent); }
+        for (let i = 0 ; i < boardColumns; i++) { this.array[i] = new Piece(i, "Blue"); }
+        for (let i = 3 * boardColumns; i < 4 * boardColumns; i++) { this.array[i] = new Piece(i, "Red"); }
     }
 
     movePiece(selectedPieceId, targetPosition) {
@@ -200,7 +200,7 @@ class Game {
             const cellToPaint = document.getElementById(i);
 
             if (currentPiece != null) {
-                if (currentPiece.getOwner() == "Player1") {
+                if (currentPiece.getOwner() == "Blue") {
                     cellToPaint.style.backgroundColor = "rgb(50, 91, 225)";
                     cellToPaint.style.border = currentPiece.getBorderColorBasedOnState();
                 } else {
@@ -254,7 +254,7 @@ class Game {
     updateRemainingPieces(piece) {
         // atualiza o número de peças restantes na classe e no UI
         if (piece != null) {
-            if (piece.getOwner() == "Player1") {
+            if (piece.getOwner() == "Blue") {
                 this.bluePiecesLeft--;
             } else {
                 this.redPiecesLeft--;
@@ -289,11 +289,11 @@ class Game {
         latestDiceValue = 0;
         
         if (forfeit || this.bluePiecesLeft == 0) {
-            currentPlayer = opponent;
+            currentPlayer = "Red";
             addNewMessage(currentPlayer + " has won!");
             aiWins++;
         } else {
-            addNewMessage("Player1 has won!");
+            addNewMessage("Blue has won!");
             player1Wins++;
         }
 
@@ -343,7 +343,7 @@ function handleMouseEnter(event) {
     let currPieceID = parseInt(event.target.id);
     let piece = game.getBoard().getPieceOnPosition(currPieceID);
 
-    if (currentPlayer == "Player1" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Player1") {
+    if (currentPlayer == "Blue" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Blue") {
         let targetPositionsList = getUserTargetPositions(piece);
 
         if (currPieceID != pieceWith2AlternativesId) { 
@@ -372,7 +372,7 @@ function handleMouseLeave(event) {
     let currPieceID = parseInt(event.target.id);
     let piece = game.getBoard().getPieceOnPosition(currPieceID);
 
-    if (currentPlayer == "Player1" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Player1") {
+    if (currentPlayer == "Blue" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Blue") {
         let targetPositionsList = getUserTargetPositions(piece);
         
         if (!pieceWith2AlternativesSelected) {
@@ -391,7 +391,7 @@ function handleClick(event) {
     let currPieceID = parseInt(event.target.id);
     let piece = game.getBoard().getPieceOnPosition(currPieceID);
 
-    if (currentPlayer == "Player1" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Player1") {
+    if (currentPlayer == "Blue" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Blue") {
         let possiblePositionsForUserMove = getUserTargetPositions(piece);
         
         if (possiblePositionsForUserMove.length != 0) {
@@ -476,7 +476,7 @@ function userMove(selectedPieceId, targetPosition) {
             latestDiceValue = 0;
         } else {
             disablePassTurnButton();
-            currentPlayer = "AI";
+            currentPlayer = "Red";
             aiMove();
         }
 
@@ -490,7 +490,7 @@ function getUserPiecesOnBoard() {
 
     for (let i = 0; i < 4 * boardColumns; i++) {
         let piece = game.getBoard().getPieceOnPosition(i);
-        if (piece?.getOwner() == "Player1") {
+        if (piece?.getOwner() == "Blue") {
             userPiecesOnBoard.push(piece);
         }
     }
@@ -529,7 +529,7 @@ function getUserTargetPositions(piece) {
     // o utilizador não tiver peças suas (da mesma cor) na fila inicial (1a fila do POV do utilizador) 
     if (currentRow == 4) {
         for (let i = 0; i < boardColumns; i++) {
-            if (game.getBoard().getPieceOnPosition(i)?.getOwner() == "Player1") {
+            if (game.getBoard().getPieceOnPosition(i)?.getOwner() == "Blue") {
                 return targetPositions;
             }
         }
@@ -601,7 +601,7 @@ function aiMove() {
                 } else {
                     console.log("User's Turn");
                     addNewMessage(currentPlayer + " passed their turn");
-                    currentPlayer = "Player1";
+                    currentPlayer = "Blue";
                     addNewMessage(currentPlayer + " it's your turn, please roll the dice");
                     enableRollDiceButton();
                     enableForfeitButton();
@@ -635,7 +635,7 @@ function aiMove() {
                 aiMove();
             } else {
                 console.log("User's Turn");
-                currentPlayer = "Player1";
+                currentPlayer = "Blue";
                 addNewMessage(currentPlayer + " it's your turn, please roll the dice");
                 enableRollDiceButton();
                 enableForfeitButton();
@@ -650,7 +650,7 @@ function getAIPiecesOnBoard() {
 
     for (let i = 0; i < game.getBoard().size(); i++) {
         let piece = game.getBoard().getPieceOnPosition(i); 
-        if (piece?.owner == "AI") {
+        if (piece?.owner == "Red") {
             aiPiecesList.push(piece);
         }
     }
@@ -677,7 +677,7 @@ function getAIValidPiecesToMove() {
 function getAITargetPositions(piece) {
 
     let targetPositions = [];
-    console.log("checking piece: " + piece);
+
     let currentRow = Math.floor(piece.getPosition() / boardColumns) + 1;
 
     let targetPosition = piece.getPosition() + latestDiceValue;
@@ -690,7 +690,7 @@ function getAITargetPositions(piece) {
     // do AI 4a do POV do utilizador) 
     if (currentRow == 1) {
         for (let i = 3 * boardColumns; i < 4 * boardColumns; i++) {
-            if (game.getBoard().getPieceOnPosition(i)?.getOwner() == "AI") {
+            if (game.getBoard().getPieceOnPosition(i)?.getOwner() == "Red") {
                 return targetPositions;
             }
         }
@@ -792,7 +792,7 @@ function rollDiceVsAI() {
 
     // se for o turno do utilizador, verificamos se este tem jogadas disponiveis ou se pode repetir o lançamento dos
     // dados. Este segmento serve para ativar os butões PassTurn e Roll Dices consoante as opções do utilizador.
-    if (currentPlayer == "Player1") { 
+    if (currentPlayer == "Blue") { 
         let userValidPiecesToMoveList = getUserValidPiecesToMove();
 
         if (userValidPiecesToMoveList.length > 0) {
@@ -865,7 +865,7 @@ function passTurn() {
     if (opponent == "Player2") {
         serverPass();
     } else {
-        currentPlayer = opponent;
+        currentPlayer = "Red";
         aiMove();
     } 
 }
@@ -873,17 +873,12 @@ function passTurn() {
 function scores() {
     document.getElementById("player1").innerText = player1Wins;
     document.getElementById("ai").innerText = aiWins;
-    document.getElementById("player2").innerHTML = player2Wins;
 }
 
 function saveSettings() {
     boardColumns = document.getElementById("columnSelector").value;
     opponent = document.querySelector('input[name = "vs"]:checked').value;
     whoRollsDiceFirst = document.querySelector('input[name = "whoFirst"]:checked').value;
-    
-    if (whoRollsDiceFirst == "Opponent") {
-        whoRollsDiceFirst = opponent;
-    }
     
     clearMessages();
     game = new Game();
@@ -918,7 +913,7 @@ function addNewMessage(message, color = null) {
             li.classList.add(getCurrentPlayerColor().toLowerCase());
         }
     } else {
-        if (currentPlayer == "Player1") {
+        if (currentPlayer == "Blue") {
             li.classList.add("blue");
         } else {
             li.classList.add("red");
@@ -969,7 +964,7 @@ function startGameVsAI() {
 
     currentPlayer = whoRollsDiceFirst;
 
-    if (whoRollsDiceFirst == "AI") {
+    if (whoRollsDiceFirst == "Red") {
         aiMove();
     } else {
         addNewMessage(currentPlayer + " it's your turn, please roll the dice");
