@@ -71,28 +71,7 @@ class Piece {
                 return "3px solid rgba(157, 13, 6, 1)";
             }
         }
-    }
-
-    getBorderColorBasedOnStatev2() {
-        console.log(this.owner + " " + bluePlayer);
-        if (this.owner == bluePlayer) {
-            if (this.state == "neverMoved") {
-                return "3px solid rgba(181, 198, 252, 1)";
-            } else if (this.state == "neverBeenInFourthRow") {
-                return "3px solid rgba(85, 123, 247, 1)";
-            }   else {
-                return "3px solid rgba(0, 38, 163, 1)";
-            }
-        } else {
-            if (this.state == "neverMoved") {
-                return "3px solid rgba(254, 201, 198, 1)";
-            } else if (this.state == "neverBeenInFourthRow") {
-                return "3px solid rgba(252, 116, 109, 1)";
-            }   else {
-                return "3px solid rgba(157, 13, 6, 1)";
-            }
-        }
-    }    
+    }  
 }
 
 class Board {
@@ -124,24 +103,6 @@ class Board {
     
     size() {
         return this.array.length;
-    }
-
-    mimicServerBoard() {
-        for (let i = 0; i < boardColumns; i++) {
-            if (nickColor == "Blue") {
-                this.array[i].owner = nick;
-            } else {
-                this.array[i].owner = opponentNick;
-            }
-        }
-
-        for (let i = 3 * boardColumns; i < 4 * boardColumns; i++) {
-            if (nickColor == "Red") {
-                this.array[i].owner = nick;
-            } else {
-                this.array[i].owner = opponentNick;
-            }
-        }
     }
 }
 
@@ -206,26 +167,6 @@ class Game {
                 } else {
                     cellToPaint.style.backgroundColor = "rgb(225, 59, 50)";
                     cellToPaint.style.border = currentPiece.getBorderColorBasedOnState();                
-                }
-            } else {
-                cellToPaint.style.backgroundColor = "transparent";
-                cellToPaint.style.border = "3px dotted rgb(190, 129, 94)";
-            }
-        }
-    }
-
-    updatePiecesOnUIv2() {
-        for (let i = 0; i < this.board.size(); i++) {
-            let currentPiece = this.board.getPieceOnPosition(i);
-            const cellToPaint = document.getElementById(i);
-
-            if (currentPiece != null) {
-                if (currentPiece.getOwner() == bluePlayer) {
-                    cellToPaint.style.backgroundColor = "rgb(50, 91, 225)";
-                    cellToPaint.style.border = currentPiece.getBorderColorBasedOnStatev2();
-                } else {
-                    cellToPaint.style.backgroundColor = "rgb(225, 59, 50)";
-                    cellToPaint.style.border = currentPiece.getBorderColorBasedOnStatev2();                
                 }
             } else {
                 cellToPaint.style.backgroundColor = "transparent";
@@ -301,10 +242,6 @@ class Game {
         const startGameButtonArea = document.getElementById("startGameButtonArea");
         forfeitPassTurnButtonArea.style.display = "none";
         startGameButtonArea.style.display = "flex";
-    }
-
-    mimicServerBoard() {
-        this.board.mimicServerBoard();
     }
 }
 
@@ -910,14 +847,10 @@ function addNewMessage(message, color = null) {
         if (color != null) {
             li.classList.add(color.toLowerCase());
         } else {
-            li.classList.add(getCurrentPlayerColor().toLowerCase());
+            li.classList.add(currentPlayer.toLowerCase());
         }
     } else {
-        if (currentPlayer == "Blue") {
-            li.classList.add("blue");
-        } else {
-            li.classList.add("red");
-        }
+        li.classList.add(currentPlayer.toLowerCase());
     }
 
     list.insertBefore(li, list.firstChild);
@@ -986,6 +919,7 @@ function startGameVsPlayer2() {
         disablePassTurnButton();
         enableForfeitButton();
 
+        addNewMessage("Searching for opponent...", "yellow");
         serverJoin();
     }
 }
@@ -1008,53 +942,50 @@ const passwordField = document.getElementById("passwordInput");
 let nick;
 let password;
 
-let gameID;
-
-let nickColor;
 let opponentNick;
-let opponentColor;
-let bluePlayer;
-let redPlayer;
+
+let bluePlayerNick;
+let redPlayerNick;
 
 
+let gameID;
 let gameIsSetUp = false;
 
-function getCurrentPlayerColor() {
-    if (currentPlayer == nick) {
-        return nickColor;
+
+function getPlayerColor(nick) {
+    if (nick == bluePlayerNick) {
+        return "Blue";
     }
-    return opponentColor;
+    return "Red";
 }
 
-function setUpGame(players, turn) {
-    nickColor = players[nick];
-    opponentNick = Object.keys(players).find(key => key != nick);
-    opponentColor = players[opponentNick];
 
-    if (nickColor == "Blue") {
-        bluePlayer = nick;
-        redPlayer = opponentNick;
+function setUpGame(players, turn) {
+    opponentNick = Object.keys(players).find(key => key != nick);
+
+    if (players[nick] == "Blue") {
+        bluePlayerNick = nick;
+        redPlayerNick = opponentNick;
     } else {
-        bluePlayer = opponentNick;
-        redPlayer = nick;    
+        bluePlayerNick = opponentNick;
+        redPlayerNick = nick;    
     }   
     
     enableForfeitButton();
 
     if (turn == nick) {
-        currentPlayer = nick;
         enableRollDiceButton();
-    } else {
-        currentPlayer = opponentNick;
     }
-        
-    game.mimicServerBoard();
-    
+
+    currentPlayer = "Blue";
+            
     console.log(game.getBoard());
     console.log("Playing first: " + currentPlayer);
     
+    clearMessages();
+    addNewMessage("Opponent found!", "yellow")
     addNewMessage("Connection established!", "yellow");
-    addNewMessage("Hello " + nick + "! You will play as " + nickColor, nickColor);
+    addNewMessage("Hello " + nick + "! You will play as " + getPlayerColor(nick), getPlayerColor(nick));
     gameIsSetUp = true;
 }
 
@@ -1072,9 +1003,9 @@ function handleServerRollDice(stickValues, value, keepPlaying) {
     }
 
     if (!keepPlaying) {
-        addNewMessage(currentPlayer + " you have no moves available, please pass your turn");
+        // addNewMessage(currentPlayer + " you have no moves available, please pass your turn");
 
-        if (currentPlayer == nick) {
+        if (currentPlayer == getPlayerColor(nick)) {
             enablePassTurnButton();            
         }
     }
@@ -1082,12 +1013,12 @@ function handleServerRollDice(stickValues, value, keepPlaying) {
 
 
 function handleServerPassTurn(turn) {
-    addNewMessage(currentPlayer + " passed their turn");
+    // addNewMessage(currentPlayer + " passed their turn");
     resetDice();
     disablePassTurnButton();
-    currentPlayer = turn;
+    currentPlayer = getPlayerColor(turn);
 
-    if (currentPlayer != nick) {
+    if (currentPlayer != getPlayerColor(nick)) {
         disableRollDiceButton();
     } else {
         enableRollDiceButton();
@@ -1101,20 +1032,20 @@ function handleServerWinner(winner) {
         if (game.bluePiecesLeft != 0 && game.redPiecesLeft != 0) {
             // One of the players has forfeit
             if (winner == nick) {
-                addNewMessage(opponentNick + " has forfeit and left the match", opponentColor);
-                addNewMessage(nick + " won!", nickColor);
+                addNewMessage(opponentNick + " has forfeit and left the match", getPlayerColor(opponentNick));
+                addNewMessage(nick + " won!", getPlayerColor(nick));
             } else {
-                addNewMessage(nick + " has forfeit and left the match", nickColor);
-                addNewMessage(opponentNick + " won!", opponentColor);
+                addNewMessage(nick + " has forfeit and left the match", getPlayerColor(nick));
+                addNewMessage(opponentNick + " won!", getPlayerColor(opponentNick));
             }
         } else {
             // One of the players has no remaining pieces (lost)
             if (winner == nick) {
-                addNewMessage(opponentNick + " has no remaining pieces left", opponentColor);
-                addNewMessage(nick + " won!", nickColor);
+                addNewMessage(opponentNick + " has no remaining pieces left", getPlayerColor(opponentNick));
+                addNewMessage(nick + " won!", getPlayerColor(nick));
             } else {
-                addNewMessage(nick + "  has no remaining pieces left", nickColor);
-                addNewMessage(opponentNick + " won!", opponentColor);
+                addNewMessage(nick + "  has no remaining pieces left", getPlayerColor(nick));
+                addNewMessage(opponentNick + " won!", getPlayerColor(opponentNick));
             }
         }
     } else {
@@ -1248,7 +1179,7 @@ function serverUpdate() {
 
         if ("step" in json && "selected" in json && json.step == "from") {
             game.getBoard().movePiece(json.selected[0], json.selected[1]);
-            game.updatePiecesOnUIv2();
+            game.updatePiecesOnUI();
         }
 
         if ("winner" in json) {
