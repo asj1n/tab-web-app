@@ -1,7 +1,7 @@
 let currentVisibleScreen = document.getElementById("loginScreen");
 let boardColumns = 7;
 let opponent = "Player2";
-let whoRollsDiceFirst = "Player1";
+let whoRollsDiceFirst = "Blue";
 let player1Wins = 0;
 let player2Wins = 0;
 let aiWins = 0;
@@ -13,6 +13,27 @@ let pieceWith2AlternativesSelected = false;
 let pieceWith2AlternativesId = null;
 
 let numbersToggled = true;
+
+
+
+// no futuro não poderá ser num const visto que teremos a opção do nosso em node.
+const server = ""
+
+const usernameField = document.getElementById("usernameInput");
+const passwordField = document.getElementById("passwordInput");
+
+
+let nick;
+let password;
+
+let opponentNick;
+
+let bluePlayerNick;
+let redPlayerNick;
+
+let gameID;
+let gameIsSetUp = false;
+
 
 
 class Piece {
@@ -41,9 +62,9 @@ class Piece {
         if (this.state != "hasBeenInFourthRow") {
             if (this.state == "neverMoved") {
                 this.state = "neverBeenInFourthRow";
-            } else if (positionRow == 4 && this.owner == "Player1") {
+            } else if (positionRow == 4 && this.owner == "Blue") {
                 this.state = "hasBeenInFourthRow";
-            } else if (positionRow == 1 && this.owner == opponent) {
+            } else if (positionRow == 1 && this.owner == "Red") {
                 this.state = "hasBeenInFourthRow";
             }
         }
@@ -54,7 +75,7 @@ class Piece {
     }
 
     getBorderColorBasedOnState() {
-        if (this.owner == "Player1") {
+        if (this.owner == "Blue") {
             if (this.state == "neverMoved") {
                 return "3px solid rgba(181, 198, 252, 1)";
             } else if (this.state == "neverBeenInFourthRow") {
@@ -71,35 +92,14 @@ class Piece {
                 return "3px solid rgba(157, 13, 6, 1)";
             }
         }
-    }
-
-    getBorderColorBasedOnStatev2() {
-        console.log(this.owner + " " + bluePlayer);
-        if (this.owner == bluePlayer) {
-            if (this.state == "neverMoved") {
-                return "3px solid rgba(181, 198, 252, 1)";
-            } else if (this.state == "neverBeenInFourthRow") {
-                return "3px solid rgba(85, 123, 247, 1)";
-            }   else {
-                return "3px solid rgba(0, 38, 163, 1)";
-            }
-        } else {
-            if (this.state == "neverMoved") {
-                return "3px solid rgba(254, 201, 198, 1)";
-            } else if (this.state == "neverBeenInFourthRow") {
-                return "3px solid rgba(252, 116, 109, 1)";
-            }   else {
-                return "3px solid rgba(157, 13, 6, 1)";
-            }
-        }
-    }    
+    }  
 }
 
 class Board {
     constructor() {
         this.array = new Array(boardColumns * 4).fill(null);
-        for (let i = 0 ; i < boardColumns; i++) { this.array[i] = new Piece(i, "Player1"); }
-        for (let i = 3 * boardColumns; i < 4 * boardColumns; i++) { this.array[i] = new Piece(i, opponent); }
+        for (let i = 0 ; i < boardColumns; i++) { this.array[i] = new Piece(i, "Blue"); }
+        for (let i = 3 * boardColumns; i < 4 * boardColumns; i++) { this.array[i] = new Piece(i, "Red"); }
     }
 
     movePiece(selectedPieceId, targetPosition) {
@@ -124,24 +124,6 @@ class Board {
     
     size() {
         return this.array.length;
-    }
-
-    mimicServerBoard() {
-        for (let i = 0; i < boardColumns; i++) {
-            if (nickColor == "Blue") {
-                this.array[i].owner = nick;
-            } else {
-                this.array[i].owner = opponentNick;
-            }
-        }
-
-        for (let i = 3 * boardColumns; i < 4 * boardColumns; i++) {
-            if (nickColor == "Red") {
-                this.array[i].owner = nick;
-            } else {
-                this.array[i].owner = opponentNick;
-            }
-        }
     }
 }
 
@@ -181,11 +163,18 @@ class Game {
                     cellPiece.id = (i + 1) * boardColumns - (j + 1);
                 }
 
-                cellPiece.addEventListener("mouseenter", handleMouseEnter);
+                if (opponent == "AI") {
+                    cellPiece.addEventListener("mouseenter", handleMouseEnter);
+                    cellPiece.addEventListener("mouseleave", handleMouseLeave);
+                    cellPiece.addEventListener("click", handleClick);
+                }
 
-                cellPiece.addEventListener("mouseleave", handleMouseLeave);
-
-                cellPiece.addEventListener("click", handleClick);
+                if (opponent == "Player2" && gameIsSetUp) {
+                    console.log("Setting up listeners for " + nick + " with color " + getPlayerColor(nick))
+                    cellPiece.addEventListener("mouseenter", (event) => { handleMouseEnterVsPlayer2(event, getPlayerColor(nick)) });
+                    cellPiece.addEventListener("mouseleave", (event) => { handleMouseLeaveVsPlayer2(event, getPlayerColor(nick)) });
+                    cellPiece.addEventListener("click", (event) => { handleClickVsPlayer2(event, getPlayerColor(nick)) });
+                }
 
                 cellBox.appendChild(cellPiece);
                 boardContainer.appendChild(cellBox);
@@ -200,32 +189,12 @@ class Game {
             const cellToPaint = document.getElementById(i);
 
             if (currentPiece != null) {
-                if (currentPiece.getOwner() == "Player1") {
+                if (currentPiece.getOwner() == "Blue") {
                     cellToPaint.style.backgroundColor = "rgb(50, 91, 225)";
                     cellToPaint.style.border = currentPiece.getBorderColorBasedOnState();
                 } else {
                     cellToPaint.style.backgroundColor = "rgb(225, 59, 50)";
                     cellToPaint.style.border = currentPiece.getBorderColorBasedOnState();                
-                }
-            } else {
-                cellToPaint.style.backgroundColor = "transparent";
-                cellToPaint.style.border = "3px dotted rgb(190, 129, 94)";
-            }
-        }
-    }
-
-    updatePiecesOnUIv2() {
-        for (let i = 0; i < this.board.size(); i++) {
-            let currentPiece = this.board.getPieceOnPosition(i);
-            const cellToPaint = document.getElementById(i);
-
-            if (currentPiece != null) {
-                if (currentPiece.getOwner() == bluePlayer) {
-                    cellToPaint.style.backgroundColor = "rgb(50, 91, 225)";
-                    cellToPaint.style.border = currentPiece.getBorderColorBasedOnStatev2();
-                } else {
-                    cellToPaint.style.backgroundColor = "rgb(225, 59, 50)";
-                    cellToPaint.style.border = currentPiece.getBorderColorBasedOnStatev2();                
                 }
             } else {
                 cellToPaint.style.backgroundColor = "transparent";
@@ -254,7 +223,7 @@ class Game {
     updateRemainingPieces(piece) {
         // atualiza o número de peças restantes na classe e no UI
         if (piece != null) {
-            if (piece.getOwner() == "Player1") {
+            if (piece.getOwner() == "Blue") {
                 this.bluePiecesLeft--;
             } else {
                 this.redPiecesLeft--;
@@ -278,7 +247,7 @@ class Game {
 
         this.updatePiecesOnUI();
 
-        if (this.isGameFinished()) {
+        if (opponent == "AI" && this.isGameFinished()) {
             this.processWin();
         }
     }
@@ -289,11 +258,11 @@ class Game {
         latestDiceValue = 0;
         
         if (forfeit || this.bluePiecesLeft == 0) {
-            currentPlayer = opponent;
+            currentPlayer = "Red";
             addNewMessage(currentPlayer + " has won!");
             aiWins++;
         } else {
-            addNewMessage("Player1 has won!");
+            addNewMessage("Blue has won!");
             player1Wins++;
         }
 
@@ -301,10 +270,6 @@ class Game {
         const startGameButtonArea = document.getElementById("startGameButtonArea");
         forfeitPassTurnButtonArea.style.display = "none";
         startGameButtonArea.style.display = "flex";
-    }
-
-    mimicServerBoard() {
-        this.board.mimicServerBoard();
     }
 }
 
@@ -343,8 +308,8 @@ function handleMouseEnter(event) {
     let currPieceID = parseInt(event.target.id);
     let piece = game.getBoard().getPieceOnPosition(currPieceID);
 
-    if (currentPlayer == "Player1" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Player1") {
-        let targetPositionsList = getUserTargetPositions(piece);
+    if (currentPlayer == "Blue" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Blue") {
+        let targetPositionsList = getBluePieceTargetPositions(piece);
 
         if (currPieceID != pieceWith2AlternativesId) { 
 
@@ -368,12 +333,70 @@ function handleMouseEnter(event) {
     }
 }
 
+function handleMouseEnterVsPlayer2(event, color) {
+    let currPieceID = parseInt(event.target.id);
+    let piece = game.getBoard().getPieceOnPosition(currPieceID);
+
+    if (currentPlayer == color && game.getBoard().getPieceOnPosition(currPieceID)?.owner == color) {
+        
+        let targetPositionsList = [];
+        if (color == "Blue") {
+            targetPositionsList = getBluePieceTargetPositions(piece);
+        } else {
+            targetPositionsList = getRedPieceTargetPositions(piece);
+        }
+
+        if (currPieceID != pieceWith2AlternativesId) { 
+
+            // reduce scale first
+            pieceWith2AlternativesId = null;
+            pieceWith2AlternativesSelected = false;
+            game.updatePiecesOnUI();
+
+            const cellPiece = event.target;
+            cellPiece.style.transition = "transform 0.2s ease";
+            cellPiece.style.transform = "scale(1.08)";
+
+            for (let position of targetPositionsList) {
+                let positionId = position.toString();
+                const cellPosition = document.getElementById(positionId);
+                cellPosition.style.backgroundColor = "rgba(11, 234, 26, 0.3)";
+                cellPosition.style.border = "3px dotted rgba(2, 25, 3, 0.45)";
+            }
+        }
+    }
+}
+
 function handleMouseLeave(event) {
     let currPieceID = parseInt(event.target.id);
     let piece = game.getBoard().getPieceOnPosition(currPieceID);
 
-    if (currentPlayer == "Player1" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Player1") {
-        let targetPositionsList = getUserTargetPositions(piece);
+    if (currentPlayer == "Blue" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Blue") {
+        let targetPositionsList = getBluePieceTargetPositions(piece);
+        
+        if (!pieceWith2AlternativesSelected) {
+            const cellPiece = event.target;
+            cellPiece.style.transition = "transform 0.2s ease";
+            cellPiece.style.transform = "scale(1)";
+
+            if (targetPositionsList.length != 0) {
+                game.updatePiecesOnUI();
+            }
+        }
+    }
+}
+
+function handleMouseLeaveVsPlayer2(event, color) {
+    let currPieceID = parseInt(event.target.id);
+    let piece = game.getBoard().getPieceOnPosition(currPieceID);
+
+    if (currentPlayer == color && game.getBoard().getPieceOnPosition(currPieceID)?.owner == color) {
+        let targetPositionsList = [];
+        if (color == "Blue") {
+            targetPositionsList = getBluePieceTargetPositions(piece);
+        } else {
+            targetPositionsList = getRedPieceTargetPositions(piece);
+        }
         
         if (!pieceWith2AlternativesSelected) {
             const cellPiece = event.target;
@@ -391,8 +414,8 @@ function handleClick(event) {
     let currPieceID = parseInt(event.target.id);
     let piece = game.getBoard().getPieceOnPosition(currPieceID);
 
-    if (currentPlayer == "Player1" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Player1") {
-        let possiblePositionsForUserMove = getUserTargetPositions(piece);
+    if (currentPlayer == "Blue" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Blue") {
+        let possiblePositionsForUserMove = getBluePieceTargetPositions(piece);
         
         if (possiblePositionsForUserMove.length != 0) {
             if (possiblePositionsForUserMove.length == 2) {
@@ -410,9 +433,66 @@ function handleClick(event) {
     } else {
         if (pieceWith2AlternativesSelected) {
             let pieceWith2Alternatives = game.getBoard().getPieceOnPosition(pieceWith2AlternativesId);
-            let selectedPieceTargetPositions = getUserTargetPositions(pieceWith2Alternatives);
+            let selectedPieceTargetPositions = getBluePieceTargetPositions(pieceWith2Alternatives);
             if (selectedPieceTargetPositions.includes(currPieceID)) {
                 userMove(pieceWith2AlternativesId, currPieceID);
+            } else {
+                console.log("Position clicked not within: ", selectedPieceTargetPositions);
+            }
+        } else {
+            pieceWith2AlternativesSelected = false;
+            pieceWith2AlternativesId = null;
+            console.log("Invalid Selection");
+        }
+    }
+}
+
+function handleClickVsPlayer2(event, color) {
+    let currPieceID = parseInt(event.target.id);
+    let piece = game.getBoard().getPieceOnPosition(currPieceID);
+
+    if (currentPlayer == color && game.getBoard().getPieceOnPosition(currPieceID)?.owner == color) {
+        let targetPositionsList = [];
+        if (color == "Blue") {
+            targetPositionsList = getBluePieceTargetPositions(piece);
+        } else {
+            targetPositionsList = getRedPieceTargetPositions(piece);
+        }
+        
+        
+        if (targetPositionsList.length != 0) {
+            if (targetPositionsList.length == 2) {
+                pieceWith2AlternativesSelected = true;
+                pieceWith2AlternativesId = currPieceID;
+            } else {
+                pieceWith2AlternativesSelected = false;
+                pieceWith2AlternativesId = null;
+                //userMove(currPieceID, targetPositionsList[0]);
+
+                serverNotify(currPieceID)
+            }
+        } else {
+            console.log("Piece " + currPieceID + " can't move.");
+        }
+
+    } else {
+        if (pieceWith2AlternativesSelected) {
+            let pieceWith2Alternatives = game.getBoard().getPieceOnPosition(pieceWith2AlternativesId);
+
+            let selectedPieceTargetPositions = [];
+            if (color == "Blue") {
+                selectedPieceTargetPositions = getBluePieceTargetPositions(pieceWith2Alternatives);
+            } else {
+                selectedPieceTargetPositions = getRedPieceTargetPositions(pieceWith2Alternatives);
+            }
+
+            if (selectedPieceTargetPositions.includes(currPieceID)) {
+                //userMove(pieceWith2AlternativesId, currPieceID);
+                console.log("Notifying piece with two alternatives: " + pieceWith2AlternativesId + " to " + currPieceID);
+                serverNotify(pieceWith2AlternativesId);
+                setTimeout(async () => {
+                    const r = await serverNotify(currPieceID);;
+                }, 1000);
             } else {
                 console.log("Position clicked not within: ", selectedPieceTargetPositions);
             }
@@ -476,7 +556,7 @@ function userMove(selectedPieceId, targetPosition) {
             latestDiceValue = 0;
         } else {
             disablePassTurnButton();
-            currentPlayer = "AI";
+            currentPlayer = "Red";
             aiMove();
         }
 
@@ -485,37 +565,37 @@ function userMove(selectedPieceId, targetPosition) {
     }
 }
 
-function getUserPiecesOnBoard() {
-    let userPiecesOnBoard = [];
+function getBluePiecesOnBoard() {
+    let bluePiecesOnBoard = [];
 
     for (let i = 0; i < 4 * boardColumns; i++) {
         let piece = game.getBoard().getPieceOnPosition(i);
-        if (piece?.getOwner() == "Player1") {
-            userPiecesOnBoard.push(piece);
+        if (piece?.getOwner() == "Blue") {
+            bluePiecesOnBoard.push(piece);
         }
     }
 
-    return userPiecesOnBoard;
+    return bluePiecesOnBoard;
 }
 
-function getUserValidPiecesToMove() {
-    // retorna uma lista de peças do utilizador que podem ser movidas com base no estado
+function getBlueValidPiecesToMove() {
+    // retorna uma lista de peças do jogador azul que podem ser movidas com base no estado
     // do jogo e no valor do latestDiceValue 
-    let userPiecesOnBoard = getUserPiecesOnBoard();
-    let userValidPiecesToMoveList = [];
+    let bluePiecesOnBoard = getBluePiecesOnBoard();
+    let blueValidPiecesToMoveList = [];
     
-    for (let piece of userPiecesOnBoard) {
-        let pieceTargetPositions = getUserTargetPositions(piece);
+    for (let piece of bluePiecesOnBoard) {
+        let pieceTargetPositions = getBluePieceTargetPositions(piece);
 
         if (pieceTargetPositions.length > 0) {
-            userValidPiecesToMoveList.push(piece);
+            blueValidPiecesToMoveList.push(piece);
         }
     }
 
-    return userValidPiecesToMoveList;
+    return blueValidPiecesToMoveList;
 }
 
-function getUserTargetPositions(piece) {
+function getBluePieceTargetPositions(piece) {
 
     let targetPositions = [];
 
@@ -529,7 +609,7 @@ function getUserTargetPositions(piece) {
     // o utilizador não tiver peças suas (da mesma cor) na fila inicial (1a fila do POV do utilizador) 
     if (currentRow == 4) {
         for (let i = 0; i < boardColumns; i++) {
-            if (game.getBoard().getPieceOnPosition(i)?.getOwner() == "Player1") {
+            if (game.getBoard().getPieceOnPosition(i)?.getOwner() == "Blue") {
                 return targetPositions;
             }
         }
@@ -588,7 +668,7 @@ function aiMove() {
     setTimeout(() => {
         rollDice();
         let hasToRollAgain = willHaveToRollAgain(latestDiceValue);      
-        let validPiecesToMove = getAIValidPiecesToMove();
+        let validPiecesToMove = getRedValidPiecesToMove();
 
         // se o AI não tiver nenhuma jogada possível (peças que se possam mover)
         // verificamos se pode lançar os dados outra vez ou não 
@@ -601,7 +681,7 @@ function aiMove() {
                 } else {
                     console.log("User's Turn");
                     addNewMessage(currentPlayer + " passed their turn");
-                    currentPlayer = "Player1";
+                    currentPlayer = "Blue";
                     addNewMessage(currentPlayer + " it's your turn, please roll the dice");
                     enableRollDiceButton();
                     enableForfeitButton();
@@ -615,7 +695,7 @@ function aiMove() {
         let randomPieceIndex = Math.floor(Math.random() * validPiecesToMove.length);
         let randomSelectedPiece = validPiecesToMove[randomPieceIndex];
 
-        let selectedPiecePossibleMoves = getAITargetPositions(randomSelectedPiece);
+        let selectedPiecePossibleMoves = getRedPieceTargetPositions(randomSelectedPiece);
         let randomMoveIndex = Math.floor(Math.random() * selectedPiecePossibleMoves.length);
         let randomChosenTarget = selectedPiecePossibleMoves[randomMoveIndex];
 
@@ -635,7 +715,7 @@ function aiMove() {
                 aiMove();
             } else {
                 console.log("User's Turn");
-                currentPlayer = "Player1";
+                currentPlayer = "Blue";
                 addNewMessage(currentPlayer + " it's your turn, please roll the dice");
                 enableRollDiceButton();
                 enableForfeitButton();
@@ -645,39 +725,39 @@ function aiMove() {
     }, 2000);
 }
 
-function getAIPiecesOnBoard() {
-    let aiPiecesList = [];
+function getRedPiecesOnBoard() {
+    let redPiecesList = [];
 
     for (let i = 0; i < game.getBoard().size(); i++) {
         let piece = game.getBoard().getPieceOnPosition(i); 
-        if (piece?.owner == "AI") {
-            aiPiecesList.push(piece);
+        if (piece?.owner == "Red") {
+            redPiecesList.push(piece);
         }
     }
 
-    return aiPiecesList;
+    return redPiecesList;
 }   
 
-function getAIValidPiecesToMove() {
-    // retorna uma lista de peças do AI que podem ser movidas com base no estado
+function getRedValidPiecesToMove() {
+    // retorna uma lista de peças do jogador vermelho que podem ser movidas com base no estado
     // do jogo e no valor do latestDiceValue
-    let aiPiecesOnBoardList = getAIPiecesOnBoard();
-    let aiValidPiecesToMoveList = [];
+    let redPiecesOnBoardList = getRedPiecesOnBoard();
+    let redValidPiecesToMoveList = [];
 
-    for (let piece of aiPiecesOnBoardList) {
-        let pieceTargetPositions = getAITargetPositions(piece);
+    for (let piece of redPiecesOnBoardList) {
+        let pieceTargetPositions = getRedPieceTargetPositions(piece);
 
         if (pieceTargetPositions.length > 0) {
-            aiValidPiecesToMoveList.push(piece);
+            redValidPiecesToMoveList.push(piece);
         }
     }
-    return aiValidPiecesToMoveList;
+    return redValidPiecesToMoveList;
 }
 
-function getAITargetPositions(piece) {
+function getRedPieceTargetPositions(piece) {
 
     let targetPositions = [];
-    console.log("checking piece: " + piece);
+
     let currentRow = Math.floor(piece.getPosition() / boardColumns) + 1;
 
     let targetPosition = piece.getPosition() + latestDiceValue;
@@ -690,7 +770,7 @@ function getAITargetPositions(piece) {
     // do AI 4a do POV do utilizador) 
     if (currentRow == 1) {
         for (let i = 3 * boardColumns; i < 4 * boardColumns; i++) {
-            if (game.getBoard().getPieceOnPosition(i)?.getOwner() == "AI") {
+            if (game.getBoard().getPieceOnPosition(i)?.getOwner() == "Red") {
                 return targetPositions;
             }
         }
@@ -792,8 +872,8 @@ function rollDiceVsAI() {
 
     // se for o turno do utilizador, verificamos se este tem jogadas disponiveis ou se pode repetir o lançamento dos
     // dados. Este segmento serve para ativar os butões PassTurn e Roll Dices consoante as opções do utilizador.
-    if (currentPlayer == "Player1") { 
-        let userValidPiecesToMoveList = getUserValidPiecesToMove();
+    if (currentPlayer == "Blue") { 
+        let userValidPiecesToMoveList = getBlueValidPiecesToMove();
 
         if (userValidPiecesToMoveList.length > 0) {
             disablePassTurnButton();
@@ -815,7 +895,6 @@ function rollDiceVsAI() {
         }
     }
 }
-
 
 function diceValueName(value) {
     switch (value) {
@@ -848,12 +927,13 @@ function resetDice() {
 }
 
 function forfeit() {
+    console.log("Forfeit");
+
     if (opponent == "Player2") {
         serverLeave();
     } else {
         addNewMessage(currentPlayer + " has forfeited");
         game.processWin(true);
-        console.log("Forfeit");
     }
 }
 
@@ -865,7 +945,7 @@ function passTurn() {
     if (opponent == "Player2") {
         serverPass();
     } else {
-        currentPlayer = opponent;
+        currentPlayer = "Red";
         aiMove();
     } 
 }
@@ -873,17 +953,12 @@ function passTurn() {
 function scores() {
     document.getElementById("player1").innerText = player1Wins;
     document.getElementById("ai").innerText = aiWins;
-    document.getElementById("player2").innerHTML = player2Wins;
 }
 
 function saveSettings() {
     boardColumns = document.getElementById("columnSelector").value;
     opponent = document.querySelector('input[name = "vs"]:checked').value;
     whoRollsDiceFirst = document.querySelector('input[name = "whoFirst"]:checked').value;
-    
-    if (whoRollsDiceFirst == "Opponent") {
-        whoRollsDiceFirst = opponent;
-    }
     
     clearMessages();
     game = new Game();
@@ -915,14 +990,10 @@ function addNewMessage(message, color = null) {
         if (color != null) {
             li.classList.add(color.toLowerCase());
         } else {
-            li.classList.add(getCurrentPlayerColor().toLowerCase());
+            li.classList.add(currentPlayer.toLowerCase());
         }
     } else {
-        if (currentPlayer == "Player1") {
-            li.classList.add("blue");
-        } else {
-            li.classList.add("red");
-        }
+        li.classList.add(currentPlayer.toLowerCase());
     }
 
     list.insertBefore(li, list.firstChild);
@@ -969,7 +1040,7 @@ function startGameVsAI() {
 
     currentPlayer = whoRollsDiceFirst;
 
-    if (whoRollsDiceFirst == "AI") {
+    if (whoRollsDiceFirst == "Red") {
         aiMove();
     } else {
         addNewMessage(currentPlayer + " it's your turn, please roll the dice");
@@ -985,12 +1056,12 @@ function startGameVsPlayer2() {
         forfeitPassTurnButtonArea.style.display = "flex";
         startGameButtonArea.style.display = "none";
 
-        game = new Game();
         clearMessages();
 
         disablePassTurnButton();
         enableForfeitButton();
 
+        addNewMessage("Searching for opponent...", "yellow");
         serverJoin();
     }
 }
@@ -1003,123 +1074,117 @@ function startGameVsPlayer2() {
 ==========================================================================================================================
 */
 
-// no futuro não poderá ser num const visto que teremos a opção do nosso em node.
-const server = ""
-
-const usernameField = document.getElementById("usernameInput");
-const passwordField = document.getElementById("passwordInput");
-
-
-let nick;
-let password;
-
-let gameID;
-
-let nickColor;
-let opponentNick;
-let opponentColor;
-let bluePlayer;
-let redPlayer;
-
-
-let gameIsSetUp = false;
-
-function getCurrentPlayerColor() {
-    if (currentPlayer == nick) {
-        return nickColor;
+function getPlayerColor(nick) {
+    if (nick == bluePlayerNick) {
+        return "Blue";
     }
-    return opponentColor;
+    return "Red";
 }
 
-function setUpGame(players, turn) {
-    nickColor = players[nick];
-    opponentNick = Object.keys(players).find(key => key != nick);
-    opponentColor = players[opponentNick];
 
-    if (nickColor == "Blue") {
-        bluePlayer = nick;
-        redPlayer = opponentNick;
+function setUpGame(players, turn) {
+    gameIsSetUp = true;
+    opponentNick = Object.keys(players).find(key => key != nick);
+
+    if (players[nick] == "Blue") {
+        bluePlayerNick = nick;
+        redPlayerNick = opponentNick;
     } else {
-        bluePlayer = opponentNick;
-        redPlayer = nick;    
+        bluePlayerNick = opponentNick;
+        redPlayerNick = nick;    
     }   
     
     enableForfeitButton();
 
     if (turn == nick) {
-        currentPlayer = nick;
         enableRollDiceButton();
-    } else {
-        currentPlayer = opponentNick;
     }
-        
-    game.mimicServerBoard();
-    
+
+    currentPlayer = "Blue";
+
+    game = new Game();
+            
     console.log(game.getBoard());
     console.log("Playing first: " + currentPlayer);
     
+    clearMessages();
+    addNewMessage("Opponent found!", "yellow")
     addNewMessage("Connection established!", "yellow");
-    addNewMessage("Hello " + nick + "! You will play as " + nickColor, nickColor);
-    gameIsSetUp = true;
+    addNewMessage("Hello " + nick + "! You will play as " + getPlayerColor(nick), getPlayerColor(nick));
 }
 
 function handleServerRollDice(stickValues, value, keepPlaying) {
+    latestDiceValue = value;
     document.getElementById("diceCombinationValueDisplay").textContent = value;
     document.getElementById("diceCombinationValueName").textContent = diceValueName(value);
     addNewMessage(diceValueName(value) + " " + currentPlayer + " rolled a " + value);
 
     for (let i = 1; i <= 4; i++) {
-        if (stickValues[i]) {
+        if (stickValues[i - 1]) {
             document.getElementById("dice" + i).style.backgroundColor = "rgb(224, 167, 105)";
         } else {
             document.getElementById("dice" + i).style.backgroundColor = "rgb(49, 26, 2)";
         }
     }
 
-    if (!keepPlaying) {
-        addNewMessage(currentPlayer + " you have no moves available, please pass your turn");
+    if (currentPlayer == getPlayerColor(nick)) {
+        let validPiecesToMove = [];
 
-        if (currentPlayer == nick) {
-            enablePassTurnButton();            
+        if (currentPlayer == "Blue") {
+            validPiecesToMove = getBlueValidPiecesToMove();
+        } else {
+            validPiecesToMove = getRedValidPiecesToMove();
+        }
+
+        console.log("Calculating target positions: " + validPiecesToMove);
+
+        if (validPiecesToMove.length != 0) {
+            addNewMessage("You have moves available, please select one valid piece to move")
+            disableRollDiceButton();
+            //disablePassTurnButton();
+        } else if (keepPlaying) {
+            addNewMessage("You have no moves available, but you can roll again!")
+            enableRollDiceButton();
+        } else {
+            addNewMessage("You have no moves available, please pass your turn");
+            enablePassTurnButton();
+            disableRollDiceButton();
         }
     }
 }
 
-
 function handleServerPassTurn(turn) {
-    addNewMessage(currentPlayer + " passed their turn");
+    // addNewMessage(currentPlayer + " passed their turn");
     resetDice();
     disablePassTurnButton();
-    currentPlayer = turn;
+    currentPlayer = getPlayerColor(turn);
 
-    if (currentPlayer != nick) {
+    if (currentPlayer != getPlayerColor(nick)) {
         disableRollDiceButton();
     } else {
         enableRollDiceButton();
     }
 }
 
-
-
 function handleServerWinner(winner) {
     if (winner != null) {
         if (game.bluePiecesLeft != 0 && game.redPiecesLeft != 0) {
             // One of the players has forfeit
             if (winner == nick) {
-                addNewMessage(opponentNick + " has forfeit and left the match", opponentColor);
-                addNewMessage(nick + " won!", nickColor);
+                addNewMessage(opponentNick + " has forfeit and left the match", getPlayerColor(opponentNick));
+                addNewMessage(nick + " won!", getPlayerColor(nick));
             } else {
-                addNewMessage(nick + " has forfeit and left the match", nickColor);
-                addNewMessage(opponentNick + " won!", opponentColor);
+                addNewMessage(nick + " has forfeit and left the match", getPlayerColor(nick));
+                addNewMessage(opponentNick + " won!", getPlayerColor(opponentNick));
             }
         } else {
             // One of the players has no remaining pieces (lost)
             if (winner == nick) {
-                addNewMessage(opponentNick + " has no remaining pieces left", opponentColor);
-                addNewMessage(nick + " won!", nickColor);
+                addNewMessage(opponentNick + " has no remaining pieces left", getPlayerColor(opponentNick));
+                addNewMessage(nick + " won!", getPlayerColor(nick));
             } else {
-                addNewMessage(nick + "  has no remaining pieces left", nickColor);
-                addNewMessage(opponentNick + " won!", opponentColor);
+                addNewMessage(nick + "  has no remaining pieces left", getPlayerColor(nick));
+                addNewMessage(opponentNick + " won!", getPlayerColor(opponentNick));
             }
         }
     } else {
@@ -1236,7 +1301,6 @@ function serverUpdate() {
     const eventSource = new EventSource(buildServerURL("/update?nick=" + nick + "&game=" + gameID));
     eventSource.addEventListener("message", (message) => {       
         let json = JSON.parse(message.data);
-        console.clear();
         console.log("Received /update message: \n", json);
 
         if (!gameIsSetUp && "players" in json) {
@@ -1252,8 +1316,10 @@ function serverUpdate() {
         }
 
         if ("step" in json && "selected" in json && json.step == "from") {
-            game.getBoard().movePiece(json.selected[0], json.selected[1]);
-            game.updatePiecesOnUIv2();
+            latestDiceValue = 0;
+            //game.getBoard().movePiece(json.selected[0], json.selected[1]);
+            //game.updatePiecesOnUI();
+            game.makeMove(json.selected[0], json.selected[1]);
         }
 
         if ("winner" in json) {
