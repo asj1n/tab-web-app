@@ -1,15 +1,15 @@
-#standingsScreen {
+#rankingsScreen {
   margin: 0;
   box-sizing: border-box;
   align-items: center;
   justify-content: center;
 }
 
-.floatTextRightStandings {
+.floatTextRightRankings {
   float: right;
 }
 
-#standingsBox {
+#rankingsBox {
 	width: 15%;
   text-align: left;
 }

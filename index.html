@@ -11,7 +11,7 @@
         <link rel = "stylesheet" href = "css/dice.css">
         <link rel = "stylesheet" href = "css/board.css">
         <link rel = "stylesheet" href = "css/playScreen.css">
-        <link rel = "stylesheet" href = "css/standingsScreen.css">
+        <link rel = "stylesheet" href = "css/rankingsScreen.css">
         <link rel = "stylesheet" href = "css/settingsScreen.css">
 
         <link rel = "preconnect" href = "https://fonts.googleapis.com">
@@ -27,7 +27,7 @@
                 <button id = "showLoginScreenButton"> Login </button>
                 <button id = "showRulesScreenButton"> Rules </button>            
                 <button id = "showPlayScreenButton"> Play </button>
-                <button id = "showStandingsScreenButton"> Standings </button>
+                <button id = "showRankingsScreenButton"> Rankings </button>
                 <button id = "showSettingsScreenButton"> Settings </button>
             </div>
         </div> 
@@ -117,7 +117,7 @@
                     <b> Settings </b> button to make these changes.
                 </p>
                 
-                <p> If the user wishes to see the number of wins for each player, they can click the <b> Standings </b>
+                <p> If the user wishes to see the number of wins for each player, they can click the <b> Rankings </b>
                     button to view them. 
                 </p> 
 
@@ -230,15 +230,15 @@
             </div>
         </div>
 
-        <div id = "standingsScreen" class = "screenSize">
-            <div id = "standingsBox" class = "box">
-                <h1> STANDINGS </h1>
+        <div id = "rankingsScreen" class = "screenSize">
+            <div id = "rankingsBox" class = "box">
+                <h1> RANKINGS </h1>
 
                 <hr>
                 
                 <p>
                     <b> USER </b>
-                    <span class = "floatTextRightStandings">
+                    <span class = "floatTextRightRankings">
                         <b> WINS </b>
                     </span>
                 </p>
@@ -247,14 +247,14 @@
                 
                 <p>
                     PLAYER 1
-                    <span class = "floatTextRightStandings">
+                    <span class = "floatTextRightRankings">
                         <span id = "player1"></span>
                     </span>
                 </p>
                 
                 <p>
                     AI
-                    <span class = "floatTextRightStandings">
+                    <span class = "floatTextRightRankings">
                         <span id = "ai"></span>
                     </span>
                 </p>
@@ -272,7 +272,7 @@
                     COLUMNS:&#9;
                     <select id = "columnSelector" name = "boardColumnsSelector">
                         <option value = "7"> 7 </option>
-                        <option value = "9"> 9 </option>
+                        <option value = "9" selected> 9 </option>
                         <option value = "11"> 11 </option>
                         <option value = "13"> 13 </option>
                         <option value = "15"> 15 </option>
