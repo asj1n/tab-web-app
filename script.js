@@ -170,7 +170,6 @@ class Game {
                 }
 
                 if (opponent == "Player2" && gameIsSetUp) {
-                    console.log("Setting up listeners for " + nick + " with color " + getPlayerColor(nick));
                     cellPiece.addEventListener("mouseenter", (event) => { handleMouseEnter(event, getPlayerColor(nick)); });
                     cellPiece.addEventListener("mouseleave", (event) => { handleMouseLeave(event, getPlayerColor(nick)); });
                     cellPiece.addEventListener("click", (event) => { handleClick(event, getPlayerColor(nick)); });
@@ -266,10 +265,7 @@ class Game {
             player1Wins++;
         }
 
-        const forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
-        const startGameButtonArea = document.getElementById("startGameButtonArea");
-        forfeitPassTurnButtonArea.style.display = "none";
-        startGameButtonArea.style.display = "flex";
+        showStartGameButton();
     }
 }
 
@@ -458,6 +454,20 @@ function enableForfeitButton() {
     const forfeitButton = document.getElementById("forfeitButton");
     forfeitButton.disabled = false;
     forfeitButton.classList.toggle("disabled", false);
+}
+
+function showStartGameButton() {
+    const forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
+    const startGameButtonArea = document.getElementById("startGameButtonArea");
+    forfeitPassTurnButtonArea.style.display = "none";
+    startGameButtonArea.style.display = "flex";
+}
+
+function hideStartGameButton() {
+    const forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
+    const startGameButtonArea = document.getElementById("startGameButtonArea");
+    forfeitPassTurnButtonArea.style.display = "flex";
+    startGameButtonArea.style.display = "none";
 }
 
 function userMove(selectedPieceId, targetPosition) {
@@ -883,10 +893,7 @@ function saveSettings() {
     clearMessages();
     game = new Game();
 
-    const forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
-    const startGameButtonArea = document.getElementById("startGameButtonArea");
-    forfeitPassTurnButtonArea.style.display = "none";
-    startGameButtonArea.style.display = "flex";
+    showStartGameButton();
 
     resetDice();
     show("playScreen");
@@ -946,10 +953,7 @@ function startGame() {
 }
 
 function startGameVsAI() {
-    const forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
-    const startGameButtonArea = document.getElementById("startGameButtonArea");
-    forfeitPassTurnButtonArea.style.display = "flex";
-    startGameButtonArea.style.display = "none";
+    hideStartGameButton();
     
     game = new Game();
     clearMessages();
@@ -971,10 +975,7 @@ function startGameVsPlayer2() {
     if (nick == undefined || password == undefined) {
             alert("You must register first in order to start a game against a second player.");
     } else {
-        const forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
-        const startGameButtonArea = document.getElementById("startGameButtonArea");
-        forfeitPassTurnButtonArea.style.display = "flex";
-        startGameButtonArea.style.display = "none";
+        hideStartGameButton();
 
         clearMessages();
 
@@ -1004,6 +1005,7 @@ function getPlayerColor(nick) {
 
 function setUpGame(players, turn) {
     gameIsSetUp = true;
+    latestDiceValue = 0;
     opponentNick = Object.keys(players).find(key => key != nick);
 
     if (players[nick] == "Blue") {
@@ -1018,6 +1020,8 @@ function setUpGame(players, turn) {
 
     if (turn == nick) {
         enableRollDiceButton();
+    } else {
+        disableRollDiceButton();
     }
 
     currentPlayer = "Blue";
@@ -1031,6 +1035,20 @@ function setUpGame(players, turn) {
     addNewMessage("Opponent found!", "yellow")
     addNewMessage("Connection established!", "yellow");
     addNewMessage("Hello " + nick + "! You will play as " + getPlayerColor(nick), getPlayerColor(nick));
+}
+
+function resetGame() {
+    setTimeout(() => {
+        clearMessages();
+        game = new Game();
+    }, 2000);
+
+    gameIsSetUp = false;
+    latestDiceValue = 0;
+    resetDice();
+    disablePassTurnButton();
+    disableRollDiceButton();
+    showStartGameButton();
 }
 
 function handleServerRollDice(stickValues, value, keepPlaying) {
@@ -1061,10 +1079,13 @@ function handleServerRollDice(stickValues, value, keepPlaying) {
         if (validPiecesToMove.length != 0) {
             addNewMessage("You have moves available, please select one valid piece to move")
             disableRollDiceButton();
-            //disablePassTurnButton();
         } else if (keepPlaying) {
             addNewMessage("You have no moves available, but you can roll again!")
-            enableRollDiceButton();
+            setTimeout( () => {
+                resetDice();
+                enableRollDiceButton();
+            }, 1500);
+            latestDiceValue = 0;
         } else {
             addNewMessage("You have no moves available, please pass your turn");
             enablePassTurnButton();
@@ -1078,6 +1099,7 @@ function handleServerPassTurn(turn) {
     resetDice();
     disablePassTurnButton();
     currentPlayer = getPlayerColor(turn);
+    latestDiceValue = 0;
 
     if (currentPlayer != getPlayerColor(nick)) {
         disableRollDiceButton();
@@ -1109,11 +1131,11 @@ function handleServerWinner(winner) {
         }
     } else {
         // User left waiting queue. Make Start Game button reappear
-        const forfeitPassTurnButtonArea = document.getElementById("forfeitPassTurnButtonArea");
-        const startGameButtonArea = document.getElementById("startGameButtonArea");
-        forfeitPassTurnButtonArea.style.display = "none";
-        startGameButtonArea.style.display = "flex";
+        clearMessages();
+        addNewMessage("You are no longer in queue", "yellow");
     }
+
+    resetGame();
 }
 
 function buildServerURL(path) {
