@@ -164,16 +164,16 @@ class Game {
                 }
 
                 if (opponent == "AI") {
-                    cellPiece.addEventListener("mouseenter", handleMouseEnter);
-                    cellPiece.addEventListener("mouseleave", handleMouseLeave);
-                    cellPiece.addEventListener("click", handleClick);
+                    cellPiece.addEventListener("mouseenter", (event) => { handleMouseEnter(event, "Blue"); });
+                    cellPiece.addEventListener("mouseleave", (event) => { handleMouseLeave(event, "Blue"); });
+                    cellPiece.addEventListener("click", (event) => { handleClick(event, "Blue"); });
                 }
 
                 if (opponent == "Player2" && gameIsSetUp) {
-                    console.log("Setting up listeners for " + nick + " with color " + getPlayerColor(nick))
-                    cellPiece.addEventListener("mouseenter", (event) => { handleMouseEnterVsPlayer2(event, getPlayerColor(nick)) });
-                    cellPiece.addEventListener("mouseleave", (event) => { handleMouseLeaveVsPlayer2(event, getPlayerColor(nick)) });
-                    cellPiece.addEventListener("click", (event) => { handleClickVsPlayer2(event, getPlayerColor(nick)) });
+                    console.log("Setting up listeners for " + nick + " with color " + getPlayerColor(nick));
+                    cellPiece.addEventListener("mouseenter", (event) => { handleMouseEnter(event, getPlayerColor(nick)); });
+                    cellPiece.addEventListener("mouseleave", (event) => { handleMouseLeave(event, getPlayerColor(nick)); });
+                    cellPiece.addEventListener("click", (event) => { handleClick(event, getPlayerColor(nick)); });
                 }
 
                 cellBox.appendChild(cellPiece);
@@ -304,36 +304,7 @@ window.addEventListener("load", () => {
     disableRollDiceButton();
 });
 
-function handleMouseEnter(event) {
-    let currPieceID = parseInt(event.target.id);
-    let piece = game.getBoard().getPieceOnPosition(currPieceID);
-
-    if (currentPlayer == "Blue" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Blue") {
-        let targetPositionsList = getBluePieceTargetPositions(piece);
-
-        if (currPieceID != pieceWith2AlternativesId) { 
-
-            // reduce scale first
-
-            pieceWith2AlternativesId = null;
-            pieceWith2AlternativesSelected = false;
-            game.updatePiecesOnUI();
-
-            const cellPiece = event.target;
-            cellPiece.style.transition = "transform 0.2s ease";
-            cellPiece.style.transform = "scale(1.08)";
-
-            for (let position of targetPositionsList) {
-                let positionId = position.toString();
-                const cellPosition = document.getElementById(positionId);
-                cellPosition.style.backgroundColor = "rgba(11, 234, 26, 0.3)";
-                cellPosition.style.border = "3px dotted rgba(2, 25, 3, 0.45)";
-            }
-        }
-    }
-}
-
-function handleMouseEnterVsPlayer2(event, color) {
+function handleMouseEnter(event, color) {
     let currPieceID = parseInt(event.target.id);
     let piece = game.getBoard().getPieceOnPosition(currPieceID);
 
@@ -367,26 +338,7 @@ function handleMouseEnterVsPlayer2(event, color) {
     }
 }
 
-function handleMouseLeave(event) {
-    let currPieceID = parseInt(event.target.id);
-    let piece = game.getBoard().getPieceOnPosition(currPieceID);
-
-    if (currentPlayer == "Blue" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Blue") {
-        let targetPositionsList = getBluePieceTargetPositions(piece);
-        
-        if (!pieceWith2AlternativesSelected) {
-            const cellPiece = event.target;
-            cellPiece.style.transition = "transform 0.2s ease";
-            cellPiece.style.transform = "scale(1)";
-
-            if (targetPositionsList.length != 0) {
-                game.updatePiecesOnUI();
-            }
-        }
-    }
-}
-
-function handleMouseLeaveVsPlayer2(event, color) {
+function handleMouseLeave(event, color) {
     let currPieceID = parseInt(event.target.id);
     let piece = game.getBoard().getPieceOnPosition(currPieceID);
 
@@ -410,44 +362,7 @@ function handleMouseLeaveVsPlayer2(event, color) {
     }
 }
 
-function handleClick(event) {
-    let currPieceID = parseInt(event.target.id);
-    let piece = game.getBoard().getPieceOnPosition(currPieceID);
-
-    if (currentPlayer == "Blue" && game.getBoard().getPieceOnPosition(currPieceID)?.owner == "Blue") {
-        let possiblePositionsForUserMove = getBluePieceTargetPositions(piece);
-        
-        if (possiblePositionsForUserMove.length != 0) {
-            if (possiblePositionsForUserMove.length == 2) {
-                pieceWith2AlternativesSelected = true;
-                pieceWith2AlternativesId = currPieceID;
-            } else {
-                pieceWith2AlternativesSelected = false;
-                pieceWith2AlternativesId = null;
-                userMove(currPieceID, possiblePositionsForUserMove[0]);
-            }
-        } else {
-            console.log("Piece " + currPieceID + " can't move.");
-        }
-
-    } else {
-        if (pieceWith2AlternativesSelected) {
-            let pieceWith2Alternatives = game.getBoard().getPieceOnPosition(pieceWith2AlternativesId);
-            let selectedPieceTargetPositions = getBluePieceTargetPositions(pieceWith2Alternatives);
-            if (selectedPieceTargetPositions.includes(currPieceID)) {
-                userMove(pieceWith2AlternativesId, currPieceID);
-            } else {
-                console.log("Position clicked not within: ", selectedPieceTargetPositions);
-            }
-        } else {
-            pieceWith2AlternativesSelected = false;
-            pieceWith2AlternativesId = null;
-            console.log("Invalid Selection");
-        }
-    }
-}
-
-function handleClickVsPlayer2(event, color) {
+function handleClick(event, color) {
     let currPieceID = parseInt(event.target.id);
     let piece = game.getBoard().getPieceOnPosition(currPieceID);
 
@@ -467,9 +382,11 @@ function handleClickVsPlayer2(event, color) {
             } else {
                 pieceWith2AlternativesSelected = false;
                 pieceWith2AlternativesId = null;
-                //userMove(currPieceID, targetPositionsList[0]);
-
-                serverNotify(currPieceID)
+                if (opponent == "Player2") {
+                    serverNotify(currPieceID);
+                } else {
+                    userMove(currPieceID, targetPositionsList[0]);
+                }
             }
         } else {
             console.log("Piece " + currPieceID + " can't move.");
@@ -487,12 +404,15 @@ function handleClickVsPlayer2(event, color) {
             }
 
             if (selectedPieceTargetPositions.includes(currPieceID)) {
-                //userMove(pieceWith2AlternativesId, currPieceID);
-                console.log("Notifying piece with two alternatives: " + pieceWith2AlternativesId + " to " + currPieceID);
-                serverNotify(pieceWith2AlternativesId);
-                setTimeout(async () => {
-                    const r = await serverNotify(currPieceID);;
-                }, 1000);
+                if (opponent == "Player2") {
+                    console.log("Notifying piece with two alternatives: " + pieceWith2AlternativesId + " to " + currPieceID);
+                    serverNotify(pieceWith2AlternativesId);
+                    setTimeout(async () => {
+                        const r = await serverNotify(currPieceID);;
+                    }, 1000);
+                } else {
+                    userMove(pieceWith2AlternativesId, currPieceID);
+                }
             } else {
                 console.log("Position clicked not within: ", selectedPieceTargetPositions);
             }
