@@ -15,8 +15,6 @@ let pieceWith2AlternativesId = null;
 let numbersToggled = true;
 
 
-
-// no futuro não poderá ser num const visto que teremos a opção do nosso em node.
 const server = "";
 
 const usernameField = document.getElementById("usernameInput");
@@ -316,7 +314,7 @@ function handleMouseEnter(event, color) {
 
         if (currPieceID != pieceWith2AlternativesId) { 
 
-            // reduce scale first of the piece with 2 alternatives previously selected
+            // reduce scale of the piece with 2 alternatives previously selected otherwise it stays dilated
             if (pieceWith2AlternativesSelected) {
                 const cellPieceWith2Alternatives = document.getElementById(pieceWith2AlternativesId);
                 cellPieceWith2Alternatives.style.transition = "transform 0.2s ease";
