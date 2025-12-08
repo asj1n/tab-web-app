@@ -1,0 +1,23 @@
+{
+  "40": {
+    "7": [
+      { "nick": "as", "victories": 3, "games": 5 },
+      { "nick": "as1", "victories": 2, "games": 5 }
+    ],
+    "9": [
+      { "nick": "as", "victories": 2, "games": 5 },
+      { "nick": "as1", "victories": 3, "games": 3 },
+      { "nick": "as2", "victories": 0, "games": 2 }
+    ]
+  },
+  "1": {
+    "11": [
+      { "nick": "test", "victories": 4, "games": 4 },
+      { "nick": "testuser", "victories": 0, "games": 4 }
+    ],
+    "13": [
+      { "nick": "test", "victories": 1, "games": 2 },
+      { "nick": "testuser", "victories": 1, "games": 2 }
+    ]
+  }
+}
