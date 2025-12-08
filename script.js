@@ -3,7 +3,6 @@ let boardColumns = 7;
 let opponent = "Player2";
 let whoRollsDiceFirst = "Blue";
 let player1Wins = 0;
-let player2Wins = 0;
 let aiWins = 0;
 
 let currentPlayer = whoRollsDiceFirst;
@@ -31,8 +30,9 @@ let redPlayerNick;
 
 let gameID;
 let gameIsSetUp = false;
-
 let cellWith2Choices = null;
+
+let storageHasToBeUpdated = false;
 
 
 class Piece {
@@ -272,9 +272,11 @@ class Game {
             player1Wins++;
         }
 
+        resetDice();
         enableSaveSettingsButton();
         enableSignInButton();
         showStartGameButton();
+        setTimeout(clearMessages, 2000);
     }
 }
 
@@ -287,7 +289,7 @@ window.addEventListener("load", () => {
         "showRegisterScreenButton": () => { show("registerScreen"); },
         "showRulesScreenButton": () => { show("rulesScreen"); },
         "showPlayScreenButton": () => { show("playScreen"); },
-        "showRankingsScreenButton": () => { show("rankingsScreen"); scores(); },
+        "showRankingsScreenButton": () => { show("rankingsScreen"); renderRankings(); },
         "showSettingsScreenButton": () => { show("settingsScreen"); },
         "toggleBoardNumbersButton": () => { toggleNumbers(); },
         "startGameButton": () => { startGame(); },
@@ -930,10 +932,10 @@ function passTurn() {
     } 
 }
 
-function scores() {
-    document.getElementById("player1").innerText = player1Wins;
-    document.getElementById("ai").innerText = aiWins;
-}
+// function scores() {
+//     document.getElementById("player1").innerText = player1Wins;
+//     document.getElementById("ai").innerText = aiWins;
+// }
 
 function saveSettings() {
     boardColumns = document.getElementById("columnSelector").value;
@@ -942,6 +944,7 @@ function saveSettings() {
     document.getElementById("currentOpponentDisplay").textContent = "Playing Against: " + opponent;
 
     clearMessages();
+    storageHasToBeUpdated = true;
     game = new Game();
 
     showStartGameButton();
@@ -1038,11 +1041,11 @@ function startGameVsPlayer2() {
 }
 
 /*
-==========================================================================================================================
-==========================================================================================================================
-==========================================    Server Connection    =======================================================
-==========================================================================================================================
-==========================================================================================================================
+=========================================================================================================================
+=========================================================================================================================
+================================================    Server Connection    ================================================
+=========================================================================================================================
+=========================================================================================================================
 */
 
 function getPlayerColor(nick) {
@@ -1165,6 +1168,8 @@ function handleServerPassTurn(turn) {
 
 function handleServerWinner(winner) {
     if (winner != null) {
+        storageHasToBeUpdated = true;
+
         if (game.bluePiecesLeft != 0 && game.redPiecesLeft != 0) {
             // One of the players has forfeit
             if (winner == nick) {
@@ -1404,13 +1409,13 @@ async function serverNotify(selectedCell) {
     }
 }
 
-async function serverRanking(testSize) {
+async function serverRanking(size) {
     try {
         const response = await fetch(buildServerURL("/ranking"), {
             method: 'POST',
             body: JSON.stringify({
                 group: 40,
-                size: testSize,
+                size: size,
             })
         });
 
@@ -1418,6 +1423,7 @@ async function serverRanking(testSize) {
 
         if (response.ok) {
             console.log("Ranking:\n", json);
+            return json;
         } else {
             console.log("Rolling response not OK:", json);
         }
@@ -1426,3 +1432,45 @@ async function serverRanking(testSize) {
         console.log("Error during ranking: ", error);
     }
 }
+
+async function renderRankings() {
+    const rankingRows = document.getElementById("rankingsRows");
+    rankingRows.innerHTML = "";
+
+    if (opponent == "Player2") {
+
+        if (localStorage.length == 0 || storageHasToBeUpdated) {
+            const json = await serverRanking(boardColumns);
+            console.log("Fetching Server Rankings: ", json);
+            localStorage.setItem("data", JSON.stringify(json));
+            storageHasToBeUpdated = false;
+        }
+
+        const localStorageData = JSON.parse(localStorage.getItem("data"));
+
+        for (let data of localStorageData.ranking) {
+            rankingRows.appendChild(addRankRow(data.nick, data.victories, data.games));
+        }
+
+    } else {
+        rankingRows.appendChild(addRankRow("Player 1", player1Wins, aiWins + player1Wins));
+        rankingRows.appendChild(addRankRow("AI", aiWins, aiWins + player1Wins));
+    }
+}
+
+function addRankRow(nick, wins, totalGames) {
+    const p = document.createElement("p");
+    p.textContent = nick;
+    
+    const outerSpan = document.createElement("span");
+    outerSpan.classList.add("floatTextRightRankings");
+
+    const innerSpan = document.createElement("span");
+    innerSpan.textContent = wins + " / " + totalGames;
+
+    outerSpan.appendChild(innerSpan);
+    p.appendChild(outerSpan);
+
+    return p;
+}
+
