@@ -32,6 +32,7 @@ let redPlayerNick;
 let gameID;
 let gameIsSetUp = false;
 
+let cellWith2Choices = null;
 
 
 class Piece {
@@ -418,7 +419,7 @@ function handleClick(event, color) {
                     serverNotify(pieceWith2AlternativesId);
                     setTimeout(async () => {
                         await serverNotify(currPieceID);
-                    }, 1000);
+                    }, 200);
                 } else {
                     userMove(pieceWith2AlternativesId, currPieceID);
                 }
@@ -1060,6 +1061,7 @@ function setUpGame(players, turn) {
     console.log("Playing first: " + getPlayerNick(currentPlayer));
     
     clearMessages();
+    document.getElementById("currentOpponentDisplay").textContent = "Playing Against: " + opponentNick;
     addNewMessage("Opponent found: " + opponentNick, "yellow")
     addNewMessage("Connection established!", "yellow");
     addNewMessage("Hello " + nick + "! You will play as " + getPlayerColor(nick), getPlayerColor(nick));
@@ -1078,6 +1080,7 @@ function resetGame() {
     disablePassTurnButton();
     disableRollDiceButton();
     showStartGameButton();
+    document.getElementById("currentOpponentDisplay").textContent = "Playing Against: " + opponent;
 }
 
 function handleServerRollDice(stickValues, value, keepPlaying) {
@@ -1278,9 +1281,19 @@ function serverUpdate() {
             setUpGame(json.players, json.turn);
         }
 
-        if ("step" in json && "selected" in json && json.step == "from") {
-            latestDiceValue = 0;
-            game.makeMove(json.selected[0], json.selected[1]);
+        if ("step" in json && "selected" in json) {
+            if (json.step == "from") {
+                latestDiceValue = 0;
+
+                if (json.selected.length == 2) {
+                    game.makeMove(json.selected[0], json.selected[1]);
+                } else {
+                    game.makeMove(cellWith2Choices, json.selected[0]);
+                    cellWith2Choices = null;
+                }
+            } else {
+                cellWith2Choices = json.cell;
+            }
         }
 
         if ("dice" in json) {
