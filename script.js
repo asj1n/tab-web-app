@@ -17,7 +17,7 @@ let numbersToggled = true;
 
 
 // no futuro não poderá ser num const visto que teremos a opção do nosso em node.
-const server = ""
+const server = "";
 
 const usernameField = document.getElementById("usernameInput");
 const passwordField = document.getElementById("passwordInput");
@@ -296,6 +296,7 @@ window.addEventListener("load", () => {
     console.log(game);
     console.log("Playing against: " + opponent);
     console.log("Rolls dice first: " + whoRollsDiceFirst);
+    // document.getElementById("currentOpponentDisplay").textContent = "Current Opponent: " + opponent;
     currentVisibleScreen.style.display = "flex";
     disableRollDiceButton();
 });
@@ -315,9 +316,15 @@ function handleMouseEnter(event, color) {
 
         if (currPieceID != pieceWith2AlternativesId) { 
 
-            // reduce scale first
-            pieceWith2AlternativesId = null;
-            pieceWith2AlternativesSelected = false;
+            // reduce scale first of the piece with 2 alternatives previously selected
+            if (pieceWith2AlternativesSelected) {
+                const cellPieceWith2Alternatives = document.getElementById(pieceWith2AlternativesId);
+                cellPieceWith2Alternatives.style.transition = "transform 0.2s ease";
+                cellPieceWith2Alternatives.style.transform = "scale(1)";
+                pieceWith2AlternativesId = null;
+                pieceWith2AlternativesSelected = false;
+            }
+
             game.updatePiecesOnUI();
 
             const cellPiece = event.target;
@@ -404,19 +411,28 @@ function handleClick(event, color) {
                     console.log("Notifying piece with two alternatives: " + pieceWith2AlternativesId + " to " + currPieceID);
                     serverNotify(pieceWith2AlternativesId);
                     setTimeout(async () => {
-                        const r = await serverNotify(currPieceID);;
+                        await serverNotify(currPieceID);
                     }, 1000);
                 } else {
                     userMove(pieceWith2AlternativesId, currPieceID);
                 }
+                const cellPieceWith2Alternatives = document.getElementById(pieceWith2AlternativesId);
+                cellPieceWith2Alternatives.style.transition = "transform 0.2s ease";
+                cellPieceWith2Alternatives.style.transform = "scale(1)";
+                pieceWith2AlternativesSelected = false;
+                pieceWith2AlternativesId = null;
             } else {
                 console.log("Position clicked not within: ", selectedPieceTargetPositions);
             }
         } else {
-            pieceWith2AlternativesSelected = false;
-            pieceWith2AlternativesId = null;
             console.log("Invalid Selection");
         }
+    }
+
+    if (!pieceWith2AlternativesSelected) {
+        const cellPiece = document.getElementById(currPieceID);
+        cellPiece.style.transition = "transform 0.2s ease";
+        cellPiece.style.transform = "scale(1)"; 
     }
 }
 
@@ -487,6 +503,7 @@ function userMove(selectedPieceId, targetPosition) {
         } else {
             disablePassTurnButton();
             currentPlayer = "Red";
+            latestDiceValue = 0;
             aiMove();
         }
 
@@ -609,6 +626,7 @@ function aiMove() {
                 if (hasToRollAgain) {
                     aiMove();
                 } else {
+                    latestDiceValue = 0;
                     console.log("User's Turn");
                     addNewMessage(currentPlayer + " passed their turn");
                     currentPlayer = "Blue";
@@ -889,14 +907,15 @@ function saveSettings() {
     boardColumns = document.getElementById("columnSelector").value;
     opponent = document.querySelector('input[name = "vs"]:checked').value;
     whoRollsDiceFirst = document.querySelector('input[name = "whoFirst"]:checked').value;
-    
+    // document.getElementById("currentOpponentDisplay").textContent = "Current Opponent: " + opponent;
+
     clearMessages();
     game = new Game();
 
     showStartGameButton();
 
     resetDice();
-    show("playScreen");
+    show("playScreen"); 
 
     console.clear();
     console.log("\n\n--------------------------------- SETTINGS UPDATED ----------------------------------\n")
@@ -1073,8 +1092,6 @@ function handleServerRollDice(stickValues, value, keepPlaying) {
         } else {
             validPiecesToMove = getRedValidPiecesToMove();
         }
-
-        console.log("Calculating target positions: " + validPiecesToMove);
 
         if (validPiecesToMove.length != 0) {
             addNewMessage("You have moves available, please select one valid piece to move")
