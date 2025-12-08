@@ -932,11 +932,6 @@ function passTurn() {
     } 
 }
 
-// function scores() {
-//     document.getElementById("player1").innerText = player1Wins;
-//     document.getElementById("ai").innerText = aiWins;
-// }
-
 function saveSettings() {
     boardColumns = document.getElementById("columnSelector").value;
     opponent = document.querySelector('input[name = "vs"]:checked').value;
