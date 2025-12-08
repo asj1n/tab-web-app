@@ -272,6 +272,8 @@ class Game {
             player1Wins++;
         }
 
+        enableSaveSettingsButton();
+        enableSignInButton();
         showStartGameButton();
     }
 }
@@ -300,9 +302,9 @@ window.addEventListener("load", () => {
         document.getElementById(id).addEventListener("click", callbacks[id]);
     }
 
-    console.log(game);
-    console.log("Playing against: " + opponent);
-    console.log("Rolls dice first: " + whoRollsDiceFirst);
+    // console.log(game);
+    // console.log("Playing against: " + opponent);
+    // console.log("Rolls dice first: " + whoRollsDiceFirst);
     document.getElementById("currentOpponentDisplay").textContent = "Playing Against: " + opponent;
     currentVisibleScreen.style.display = "flex";
     disableRollDiceButton();
@@ -477,6 +479,30 @@ function enableForfeitButton() {
     const forfeitButton = document.getElementById("forfeitButton");
     forfeitButton.disabled = false;
     forfeitButton.classList.toggle("disabled", false);
+}
+
+function disableSignInButton() {
+    const loginUserButton = document.getElementById("loginUserButton");
+    loginUserButton.disabled = true;
+    loginUserButton.classList.toggle("disabled", true);
+}
+
+function enableSignInButton() {
+    const loginUserButton = document.getElementById("loginUserButton");
+    loginUserButton.disabled = false;
+    loginUserButton.classList.toggle("disabled", false);
+}
+
+function disableSaveSettingsButton() {
+    const saveSettingsButton = document.getElementById("saveSettingsButton");
+    saveSettingsButton.disabled = true;
+    saveSettingsButton.classList.toggle("disabled", true);
+}
+
+function enableSaveSettingsButton() {
+    const saveSettingsButton = document.getElementById("saveSettingsButton");
+    saveSettingsButton.disabled = false;
+    saveSettingsButton.classList.toggle("disabled", false);
 }
 
 function showStartGameButton() {
@@ -893,7 +919,6 @@ function forfeit() {
 }
 
 function passTurn() {
-    console.clear();
     console.log("Turn Passed");
     resetDice();
 
@@ -970,7 +995,9 @@ function toggleNumbers() {
 
 function startGame() {
     console.log("Start Game! button pressed");
-    
+    disableSaveSettingsButton();
+    disableSignInButton();
+
     if (opponent == "Player2") {
         startGameVsPlayer2();
     } else {
@@ -1056,9 +1083,6 @@ function setUpGame(players, turn) {
     currentPlayer = "Blue";
 
     game = new Game();
-            
-    console.log(game.getBoard());
-    console.log("Playing first: " + getPlayerNick(currentPlayer));
     
     clearMessages();
     document.getElementById("currentOpponentDisplay").textContent = "Playing Against: " + opponentNick;
@@ -1079,6 +1103,8 @@ function resetGame() {
     resetDice();
     disablePassTurnButton();
     disableRollDiceButton();
+    enableSaveSettingsButton();
+    enableSignInButton();
     showStartGameButton();
     document.getElementById("currentOpponentDisplay").textContent = "Playing Against: " + opponent;
 }
@@ -1182,7 +1208,6 @@ async function login() {
         passwordField.value = "";
 
         const success = await serverRegister();
-        console.log(success);
 
         if (success) {
             show("playScreen");
@@ -1275,7 +1300,8 @@ function serverUpdate() {
     const eventSource = new EventSource(buildServerURL("/update?nick=" + nick + "&game=" + gameID));
     eventSource.addEventListener("message", (message) => {       
         let json = JSON.parse(message.data);
-        console.log("Received /update message: \n", json);
+        console.log("Received /update message:\n", json);
+        console.log("");
 
         if (!gameIsSetUp && "players" in json) {
             setUpGame(json.players, json.turn);
@@ -1324,11 +1350,9 @@ async function serverRoll() {
 
         const json = await response.json();
 
-        if (response.ok) {
-            console.log("Rolling:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
-        } else {
+        if (!response.ok) {
             console.log("Rolling response not OK:", json);
-        }
+        } 
 
     } catch (error) {
         console.log("Error during roll: ", error);
@@ -1348,9 +1372,7 @@ async function serverPass() {
 
         const json = await response.json();
 
-        if (response.ok) {
-            console.log("Passing:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
-        } else {
+        if (!response.ok) {
             console.log("Passing response not OK:", json);
         }
 
@@ -1373,9 +1395,7 @@ async function serverNotify(selectedCell) {
 
         const json = await response.json();
 
-        if (response.ok) {
-            console.log("Notify:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
-        } else {
+        if (!response.ok) {
             console.log("Notify response not OK:", json);
         }
 
