@@ -5,7 +5,7 @@
         <title> Tâb </title>
 
         <link rel = "stylesheet" href = "css/base.css">
-        <link rel = "stylesheet" href = "css/loginScreen.css">
+        <link rel = "stylesheet" href = "css/registerScreen.css">
         <link rel = "stylesheet" href = "css/rulesScreen.css">
         <link rel = "stylesheet" href = "css/messages.css">
         <link rel = "stylesheet" href = "css/dice.css">
@@ -24,7 +24,7 @@
             <img alt = "Tâb" src = "assets/logo.png" height = 100>
 
             <div id = "headerButtonsArea">
-                <button id = "showLoginScreenButton"> Login </button>
+                <button id = "showRegisterScreenButton"> Register </button>
                 <button id = "showRulesScreenButton"> Rules </button>            
                 <button id = "showPlayScreenButton"> Play </button>
                 <button id = "showRankingsScreenButton"> Rankings </button>
@@ -32,9 +32,9 @@
             </div>
         </div> 
         
-        <div id = "loginScreen" class = "screenSize">
-            <div id = "loginBox" class = "box">
-                <h1> LOGIN </h1>
+        <div id = "registerScreen" class = "screenSize">
+            <div id = "registerBox" class = "box">
+                <h1> REGISTER </h1>
                 
                 <hr>
 
@@ -47,9 +47,9 @@
                 <input id = "passwordInput" class = "inputField" type = "password">
                 
                 <br>
-                <hr id = "loginHr">
+                <hr id = "registerHr">
                 
-                <button id = "loginUserButton"> Sign In </button>
+                <button id = "registerUserButton"> Register </button>
             </div>
         </div>
 
@@ -124,7 +124,7 @@
                     may do so by clicking the <b> Rules </b> button to see them.
                 </p>
                 
-                <p> If the user wishes to log in, they may do so by clicking the <b>Login</b>. </p>
+                <p> If the user wishes to log in / register, they may do so by clicking the <b>Register</b>. </p>
                     
                 <p> If the user wishes to return to the game panel, they may do so clicking the <b> Play </b> button. </p>
                 
@@ -168,7 +168,9 @@
                 <br>
 
                 <p> To assist gameplay, there is a panel on the left side of the board displaying messages that track 
-                    the history of the game's turns.
+                    the history of the game's turns. It is also worth noting that the user will be unable to save the
+                    settings or register during a game. To re-register or to save the settings the user must either 
+                    finish the match or forfeit / leave it first in order to do so.
                 </p>
 
                 <br>

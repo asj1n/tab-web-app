@@ -1,4 +1,4 @@
-let currentVisibleScreen = document.getElementById("loginScreen");
+let currentVisibleScreen = document.getElementById("registerScreen");
 let boardColumns = 7;
 let opponent = "Player2";
 let whoRollsDiceFirst = "Blue";
@@ -284,14 +284,14 @@ let game = new Game();
 
 window.addEventListener("load", () => {
     const callbacks = {
-        "showLoginScreenButton": () => { show("loginScreen"); },
+        "showRegisterScreenButton": () => { show("registerScreen"); },
         "showRulesScreenButton": () => { show("rulesScreen"); },
         "showPlayScreenButton": () => { show("playScreen"); },
         "showRankingsScreenButton": () => { show("rankingsScreen"); scores(); },
         "showSettingsScreenButton": () => { show("settingsScreen"); },
         "toggleBoardNumbersButton": () => { toggleNumbers(); },
         "startGameButton": () => { startGame(); },
-        "loginUserButton": () => { login(); },
+        "registerUserButton": () => { register(); },
         "forfeitButton": () => { forfeit(); },
         "passTurnButton": () => { passTurn(); },
         "rollDiceButton": () => { rollDice(); },
@@ -482,15 +482,15 @@ function enableForfeitButton() {
 }
 
 function disableSignInButton() {
-    const loginUserButton = document.getElementById("loginUserButton");
-    loginUserButton.disabled = true;
-    loginUserButton.classList.toggle("disabled", true);
+    const registerUserButton = document.getElementById("registerUserButton");
+    registerUserButton.disabled = true;
+    registerUserButton.classList.toggle("disabled", true);
 }
 
 function enableSignInButton() {
-    const loginUserButton = document.getElementById("loginUserButton");
-    loginUserButton.disabled = false;
-    loginUserButton.classList.toggle("disabled", false);
+    const registerUserButton = document.getElementById("registerUserButton");
+    registerUserButton.disabled = false;
+    registerUserButton.classList.toggle("disabled", false);
 }
 
 function disableSaveSettingsButton() {
@@ -1197,7 +1197,7 @@ function buildServerURL(path) {
     return server + path;
 }
 
-async function login() {
+async function register() {
     if (usernameField.value == "" || passwordField.value == "") {
         alert("Nick or Password fields empty");
     } else {

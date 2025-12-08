@@ -6,18 +6,18 @@
   font-weight: normal;
 }
 
-#loginScreen {
+#registerScreen {
   margin: 0;
   box-sizing: border-box;
   align-items: center;
   justify-content: center;
 }
 
-#loginBox {
+#registerBox {
 	width: 15%;
 }
 
-#loginHr {
+#registerHr {
   margin-top: 30px;
   margin-bottom: 30px;
 }
