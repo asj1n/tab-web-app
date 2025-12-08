@@ -302,7 +302,7 @@ window.addEventListener("load", () => {
     console.log(game);
     console.log("Playing against: " + opponent);
     console.log("Rolls dice first: " + whoRollsDiceFirst);
-    // document.getElementById("currentOpponentDisplay").textContent = "Playing Against: " + opponent;
+    document.getElementById("currentOpponentDisplay").textContent = "Playing Against: " + opponent;
     currentVisibleScreen.style.display = "flex";
     disableRollDiceButton();
 });
@@ -913,7 +913,7 @@ function saveSettings() {
     boardColumns = document.getElementById("columnSelector").value;
     opponent = document.querySelector('input[name = "vs"]:checked').value;
     whoRollsDiceFirst = document.querySelector('input[name = "whoFirst"]:checked').value;
-    // document.getElementById("currentOpponentDisplay").textContent = "Playing Against: " + opponent;
+    document.getElementById("currentOpponentDisplay").textContent = "Playing Against: " + opponent;
 
     clearMessages();
     game = new Game();

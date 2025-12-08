@@ -112,9 +112,8 @@
                 <h3><u> Implementation Features </u></h3>
                 <p> To start a game, the user must press the <b> Start Game! </b> button. </p>
                 
-                <p> If the user wishes to change the number of board columns, the opponent (AI or Human), which 
-                    player rolls the dice first, and/or the AI difficulty, they may do so by clicking the 
-                    <b> Settings </b> button to make these changes.
+                <p> If the user wishes to change the number of board columns, the opponent (AI or Human) and/or which 
+                    player rolls the dice first they may do so by clicking the <b> Settings </b> button to perform these changes.
                 </p>
                 
                 <p> If the user wishes to see the number of wins for each player, they can click the <b> Rankings </b>
@@ -125,9 +124,9 @@
                     may do so by clicking the <b> Rules </b> button to see them.
                 </p>
                 
-                <p> If the user wishes to log in, they may do so by clicking the <b> Login </b>. </p>
+                <p> If the user wishes to log in, they may do so by clicking the <b>Login</b>. </p>
                     
-                <p> If the user wants to return to the game panel, they may do so clicking the <b> Play </b> button. </p>
+                <p> If the user wishes to return to the game panel, they may do so clicking the <b> Play </b> button. </p>
                 
                 <br>
 
@@ -140,8 +139,8 @@
                         during gameplay.
                     </li>
 
-                    <li><b>Forfeit</b>: This button allows the user to surrender the              
-                        game at any time, granting victory to the opponent automatically.
+                    <li><b>Forfeit</b>: This button allows the user to leave / surrender the game at any time, granting victory to 
+                        the opponent automatically.
                     </li>
 
                     <li><b>Pass Turn</b>: This button is only active (clickable) when 
@@ -156,7 +155,6 @@
                     </li>
                 </ul>
                 
-
                 <br>
 
                 <p> When it is the user's turn to play, after rolling the dice, they must move a piece if there are 
@@ -178,7 +176,11 @@
                 <p> Additionally, a 2-second delay was added between the start of a turn and the dice roll, as well as 
                     between the dice roll and the AI's move, to clearly display the dice result and the AI's moves.
                 </p>
-            
+
+                <br>
+                <br>
+                
+                <p> Welcome to TÂB. Good luck and have fun! </p>            
             </div>
         </div> 
 
@@ -192,6 +194,8 @@
             </div>
 
             <div id = "boardArea"> 
+                <div id = "currentOpponentDisplay"></div>
+
                 <div id = "remainingPiecesArea" class = "box">
                     <span id = "bluePiecesRemaining" class = "score"></span>
                     <span class = "dash"> - </span>
