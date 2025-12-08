@@ -12,7 +12,7 @@ let latestDiceValue = 0;
 let pieceWith2AlternativesSelected = false;
 let pieceWith2AlternativesId = null;
 
-let numbersToggled = true;
+let numbersToggled = false;
 
 
 const server = "";
@@ -235,10 +235,18 @@ class Game {
 
     makeMove(selectedPieceId, targetPosition) {
         let targetPositionPiece = this.board.movePiece(selectedPieceId, targetPosition);
-        addNewMessage(currentPlayer + " moved piece in position " + selectedPieceId + " to " + targetPosition);
+        if (opponent == "Player2") {
+            addNewMessage(getPlayerNick(currentPlayer) + " moved piece in position " + selectedPieceId + " to " + targetPosition);
+        } else {
+            addNewMessage(currentPlayer + " moved piece in position " + selectedPieceId + " to " + targetPosition);
+        }
 
         if (targetPositionPiece != null) {
-            addNewMessage(currentPlayer + " has captured a piece!");
+            if ("Player2") {
+                addNewMessage(getPlayerNick(currentPlayer) + " has captured a piece!");                
+            } else {
+                addNewMessage(currentPlayer + " has captured a piece!");
+            }
             this.updateRemainingPieces(targetPositionPiece);
         } 
 
@@ -294,7 +302,7 @@ window.addEventListener("load", () => {
     console.log(game);
     console.log("Playing against: " + opponent);
     console.log("Rolls dice first: " + whoRollsDiceFirst);
-    // document.getElementById("currentOpponentDisplay").textContent = "Current Opponent: " + opponent;
+    // document.getElementById("currentOpponentDisplay").textContent = "Playing Against: " + opponent;
     currentVisibleScreen.style.display = "flex";
     disableRollDiceButton();
 });
@@ -506,7 +514,7 @@ function userMove(selectedPieceId, targetPosition) {
         }
 
     } else {
-        console.log("Please throw the dice first.");
+        console.log("Please roll the dice first.");
     }
 }
 
@@ -835,7 +843,7 @@ function rollDiceVsAI() {
                 }, 1000);
             } else {
                 console.log("User has no available moves, enabling PassTurn button")
-                addNewMessage(currentPlayer + " has no moves possible, please pass your turn");
+                addNewMessage(currentPlayer + " you have no moves possible, please pass your turn");
                 enablePassTurnButton();
             }
         }
@@ -905,7 +913,7 @@ function saveSettings() {
     boardColumns = document.getElementById("columnSelector").value;
     opponent = document.querySelector('input[name = "vs"]:checked').value;
     whoRollsDiceFirst = document.querySelector('input[name = "whoFirst"]:checked').value;
-    // document.getElementById("currentOpponentDisplay").textContent = "Current Opponent: " + opponent;
+    // document.getElementById("currentOpponentDisplay").textContent = "Playing Against: " + opponent;
 
     clearMessages();
     game = new Game();
@@ -993,12 +1001,9 @@ function startGameVsPlayer2() {
             alert("You must register first in order to start a game against a second player.");
     } else {
         hideStartGameButton();
-
         clearMessages();
-
         disablePassTurnButton();
         enableForfeitButton();
-
         addNewMessage("Searching for opponent...", "yellow");
         serverJoin();
     }
@@ -1019,6 +1024,12 @@ function getPlayerColor(nick) {
     return "Red";
 }
 
+function getPlayerNick(color) {
+    if (color == "Blue") {
+        return bluePlayerNick;
+    }
+    return redPlayerNick;
+}
 
 function setUpGame(players, turn) {
     gameIsSetUp = true;
@@ -1046,12 +1057,13 @@ function setUpGame(players, turn) {
     game = new Game();
             
     console.log(game.getBoard());
-    console.log("Playing first: " + currentPlayer);
+    console.log("Playing first: " + getPlayerNick(currentPlayer));
     
     clearMessages();
-    addNewMessage("Opponent found!", "yellow")
+    addNewMessage("Opponent found: " + opponentNick, "yellow")
     addNewMessage("Connection established!", "yellow");
     addNewMessage("Hello " + nick + "! You will play as " + getPlayerColor(nick), getPlayerColor(nick));
+    addNewMessage(getPlayerNick(currentPlayer) + " it's your turn, please roll the dice");
 }
 
 function resetGame() {
@@ -1072,7 +1084,7 @@ function handleServerRollDice(stickValues, value, keepPlaying) {
     latestDiceValue = value;
     document.getElementById("diceCombinationValueDisplay").textContent = value;
     document.getElementById("diceCombinationValueName").textContent = diceValueName(value);
-    addNewMessage(diceValueName(value) + " " + currentPlayer + " rolled a " + value);
+    addNewMessage(diceValueName(value) + " " + getPlayerNick(currentPlayer) + " rolled a " + value);
 
     for (let i = 1; i <= 4; i++) {
         if (stickValues[i - 1]) {
@@ -1092,17 +1104,16 @@ function handleServerRollDice(stickValues, value, keepPlaying) {
         }
 
         if (validPiecesToMove.length != 0) {
-            addNewMessage("You have moves available, please select one valid piece to move")
             disableRollDiceButton();
         } else if (keepPlaying) {
-            addNewMessage("You have no moves available, but you can roll again!")
+            addNewMessage("You have no moves available, but you can roll again", "yellow")
             setTimeout( () => {
                 resetDice();
                 enableRollDiceButton();
             }, 1500);
             latestDiceValue = 0;
         } else {
-            addNewMessage("You have no moves available, please pass your turn");
+            addNewMessage("You have no moves available, please pass your turn", "yellow");
             enablePassTurnButton();
             disableRollDiceButton();
         }
@@ -1110,11 +1121,11 @@ function handleServerRollDice(stickValues, value, keepPlaying) {
 }
 
 function handleServerPassTurn(turn) {
-    // addNewMessage(currentPlayer + " passed their turn");
     resetDice();
     disablePassTurnButton();
     currentPlayer = getPlayerColor(turn);
     latestDiceValue = 0;
+    addNewMessage(getPlayerNick(currentPlayer) + " it's your turn, please roll the dice");
 
     if (currentPlayer != getPlayerColor(nick)) {
         disableRollDiceButton();
@@ -1164,6 +1175,9 @@ async function login() {
         nick = usernameField.value;
         password = passwordField.value;
         
+        usernameField.value = "";
+        passwordField.value = "";
+
         const success = await serverRegister();
         console.log(success);
 
@@ -1264,19 +1278,17 @@ function serverUpdate() {
             setUpGame(json.players, json.turn);
         }
 
+        if ("step" in json && "selected" in json && json.step == "from") {
+            latestDiceValue = 0;
+            game.makeMove(json.selected[0], json.selected[1]);
+        }
+
         if ("dice" in json) {
             if (json.dice != null) {
                 handleServerRollDice(json.dice.stickValues, json.dice.value, json.dice.keepPlaying);
             } else {
-                handleServerPassTurn(json.turn);
+                handleServerPassTurn(json.turn, json.mustPass);
             }
-        }
-
-        if ("step" in json && "selected" in json && json.step == "from") {
-            latestDiceValue = 0;
-            //game.getBoard().movePiece(json.selected[0], json.selected[1]);
-            //game.updatePiecesOnUI();
-            game.makeMove(json.selected[0], json.selected[1]);
         }
 
         if ("winner" in json) {
