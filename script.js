@@ -1307,19 +1307,9 @@ function serverUpdate() {
             setUpGame(json.players, json.turn);
         }
 
-        if ("step" in json && "selected" in json) {
-            if (json.step == "from") {
-                latestDiceValue = 0;
-
-                if (json.selected.length == 2) {
-                    game.makeMove(json.selected[0], json.selected[1]);
-                } else {
-                    game.makeMove(cellWith2Choices, json.selected[0]);
-                    cellWith2Choices = null;
-                }
-            } else {
-                cellWith2Choices = json.cell;
-            }
+        if ("step" in json && "selected" in json && json.step == "from") {
+            latestDiceValue = 0;
+            game.makeMove(json.selected[0], json.selected[1]);
         }
 
         if ("dice" in json) {
