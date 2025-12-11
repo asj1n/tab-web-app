@@ -30,7 +30,6 @@ let redPlayerNick;
 
 let gameID;
 let gameIsSetUp = false;
-let cellWith2Choices = null;
 
 let storageHasToBeUpdated = false;
 
