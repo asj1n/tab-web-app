@@ -273,7 +273,7 @@ class Game {
 
         resetDice();
         enableSaveSettingsButton();
-        enableSignInButton();
+        enableRegisterButton();
         showStartGameButton();
         setTimeout(clearMessages, 2000);
     }
@@ -488,7 +488,7 @@ function disableRegisterButton() {
     registerUserButton.classList.toggle("disabled", true);
 }
 
-function enableSignInButton() {
+function enableRegisterButton() {
     const registerUserButton = document.getElementById("registerUserButton");
     registerUserButton.disabled = false;
     registerUserButton.classList.toggle("disabled", false);
@@ -1102,7 +1102,7 @@ function resetGame() {
     disablePassTurnButton();
     disableRollDiceButton();
     enableSaveSettingsButton();
-    enableSignInButton();
+    enableRegisterButton();
     showStartGameButton();
     document.getElementById("currentOpponentDisplay").textContent = "Playing Against: " + opponent;
 }
