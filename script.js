@@ -482,7 +482,7 @@ function enableForfeitButton() {
     forfeitButton.classList.toggle("disabled", false);
 }
 
-function disableSignInButton() {
+function disableRegisterButton() {
     const registerUserButton = document.getElementById("registerUserButton");
     registerUserButton.disabled = true;
     registerUserButton.classList.toggle("disabled", true);
@@ -992,8 +992,6 @@ function toggleNumbers() {
 
 function startGame() {
     console.log("Start Game! button pressed");
-    disableSaveSettingsButton();
-    disableSignInButton();
 
     if (opponent == "Player2") {
         startGameVsPlayer2();
@@ -1003,11 +1001,12 @@ function startGame() {
 }
 
 function startGameVsAI() {
-    hideStartGameButton();
-    
     game = new Game();
+    
+    hideStartGameButton();
     clearMessages();
-
+    disableSaveSettingsButton();
+    disableRegisterButton();
     enableRollDiceButton();
     disablePassTurnButton();
     enableForfeitButton();
@@ -1025,6 +1024,8 @@ function startGameVsPlayer2() {
     if (nick == undefined || password == undefined) {
             alert("You must register first in order to start a game against a second player.");
     } else {
+        disableSaveSettingsButton();
+        disableRegisterButton();
         hideStartGameButton();
         clearMessages();
         disablePassTurnButton();
