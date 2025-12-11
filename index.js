@@ -25,17 +25,17 @@ class Game {
         this.player2Nick = null;
         this.group = group;
         this.size = size;
-        this.gameID = this.generateGameID();
         this.winner = null;
         this.pieces = [];
+        this.createdAt = new Date();
+        this.gameID = this.generateGameID();
     }
 
     generateGameID() {
         const hashInput = JSON.stringify({
             group: this.group,
             size: this.size,
-            player1Nick: this.player1Nick
-            // Use time?
+            createdAt: this.createdAt
         });
 
         return crypto.createHash('md5').update(hashInput).digest('hex');
@@ -261,11 +261,17 @@ function handleJoin(request, response) {
         } else {
             let game = pendingGamesMap.get(key);
             gameID = game.gameID;
-            game.player2Nick = nick;
-            console.log("Matching game found: " + JSON.stringify(game));
-            // Initialize game board for /update
-            onGoingGamesMap.set(gameID, game);
-            pendingGamesMap.delete(key);
+
+            if (game.player1Nick != nick) {
+                game.player2Nick = nick;
+                console.log("Matching game found: " + JSON.stringify(game));
+                // Initialize game board for /update
+                onGoingGamesMap.set(gameID, game);
+                pendingGamesMap.delete(key);
+            } else {
+                response.statusCode = 400;
+                return response.end(JSON.stringify({ error: nick + " is already in queue" }));
+            }
         }
 
         return response.end(JSON.stringify({ game: gameID }));
@@ -345,7 +351,7 @@ function handleLeave(request, response) {
         for (const key of pendingGamesMap.keys()) {
             let pendingGame = pendingGamesMap.get(key);
 
-            if (pendingGame.player1Nick == nick) {
+            if (pendingGame.player1Nick == nick && pendingGame.gameID == game) {
                 pendingGamesMap.delete(key);
                 pendingGame.winner = null;
                 console.log("The user: " + nick + " has left the queue. Winner is " + pendingGame.winner);
