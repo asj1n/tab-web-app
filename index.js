@@ -22,6 +22,7 @@ if (!fs.existsSync(RANKINGS_FILE)) {
 class Game {
     constructor(group, size, player1Nick) {
         this.player1Nick = player1Nick;
+        this.turn = player1Nick;
         this.player2Nick = null;
         this.group = group;
         this.size = size;
@@ -47,18 +48,19 @@ const server = http.createServer((request, response) => {
 
     switch (request.url) {
         case "/register":
-            console.log("Handling Register");
             handleRegister(request, response);
             break;
         
         case "/join":
-            console.log("Handling Join");
             handleJoin(request, response);
             break;
         
         case "/leave":
-            console.log("Handling Leave");
             handleLeave(request, response);
+            break;
+
+        case "/roll":
+            handleRoll(request, response);
             break;
 
         case "/ranking":
@@ -67,7 +69,7 @@ const server = http.createServer((request, response) => {
 
         default:
             response.statusCode = 404;
-            response.end(JSON.stringify({ error: "Unknown POST request" }));
+            response.end(JSON.stringify({ error: "Unknown request" }));
     }
 });
 
@@ -365,6 +367,86 @@ function handleLeave(request, response) {
     });
 }
 
+function handleRoll(request, response) {
+    let body = "";
+
+    request.on("data", chunk => (body += chunk));
+    request.on("end", () => {
+        let data;
+
+        try {
+            data = JSON.parse(body);
+        } catch {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "Invalid JSON" }));
+        }
+
+        const nick = data.nick;
+        const password = data.password;
+        const game = data.game;  
+
+        const users = JSON.parse(fs.readFileSync(USERS_FILE, "utf8"));
+
+        if (nick == null) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "nick is undefined" }));
+        } 
+
+        if (!isString(nick)) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "nick is not a valid string" }));
+        }
+
+        if (password == null) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "password is undefined" }));
+        }
+
+        if (!isString(password)) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "password is not a valid string" }));
+        }
+
+        if (game == null) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "game is undefined" }));
+        }
+
+        if (!isString(game)) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "game is not a valid string" }));
+        }
+
+        if (!users[nick]) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "User is not registered" }));
+        }
+
+        if (users[nick] != hashPassword(password)) {
+            response.statusCode = 401;
+            return response.end(JSON.stringify({ error: "User registered with a different password" }));
+        }
+
+        if (!onGoingGamesMap.has(game)) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "game: " + game + " doesn't exist" }));
+        }
+
+        const onGoingGame = onGoingGamesMap.get(game);
+
+        if (onGoingGame.player1Nick != nick && onGoingGame.player2Nick != nick) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: nick + "isn't a player in this game" }));
+        }
+
+        if (onGoingGame.turn != nick) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "Not your turn to play" }));
+        }
+
+        return response.end(JSON.stringify({}));
+    });
+}
 
 function isString(v) {
   return typeof v === "string" || v instanceof String;
