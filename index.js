@@ -6,6 +6,9 @@ const PORT = 8140;
 const USERS_FILE = "users.json";
 const RANKINGS_FILE = "rankings.json";
 
+const onGoingGamesMap = new Map();
+const pendingGamesMap = new Map();
+
 // Ensure the users file exists
 if (!fs.existsSync(USERS_FILE)) {
     fs.writeFileSync(USERS_FILE, JSON.stringify({}, null, 2));
@@ -16,18 +19,52 @@ if (!fs.existsSync(RANKINGS_FILE)) {
     fs.writeFileSync(RANKINGS_FILE, JSON.stringify({}, null, 2));
 }
 
+class Game {
+    constructor(group, size, player1Nick) {
+        this.player1Nick = player1Nick;
+        this.player2Nick = null;
+        this.group = group;
+        this.size = size;
+        this.gameID = this.generateGameID();
+        this.winner = null;
+        this.pieces = [];
+    }
+
+    generateGameID() {
+        const hashInput = JSON.stringify({
+            group: this.group,
+            size: this.size,
+            player1Nick: this.player1Nick
+            // Use time?
+        });
+
+        return crypto.createHash('md5').update(hashInput).digest('hex');
+    }    
+}
+
 const server = http.createServer((request, response) => {
     response.setHeader("Content-Type", "application/json");
 
     switch (request.url) {
         case "/register":
+            console.log("Handling Register");
             handleRegister(request, response);
+            break;
+        
+        case "/join":
+            console.log("Handling Join");
+            handleJoin(request, response);
+            break;
+        
+        case "/leave":
+            console.log("Handling Leave");
+            handleLeave(request, response);
             break;
 
         case "/ranking":
             handleRanking(request, response);
             break;
-        
+
         default:
             response.statusCode = 404;
             response.end(JSON.stringify({ error: "Unknown POST request" }));
@@ -87,7 +124,7 @@ function handleRegister(request, response) {
             }
         } else {
             // Save new user
-            console.log("New User");
+            console.log("New User: " + nick + ": " + password);
             users[nick] = hashedPassword;
             fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
         }
@@ -142,6 +179,186 @@ function handleRanking(request, response) {
         response.end(JSON.stringify({ ranking: rankingArray }));
     });
 }
+
+function handleJoin(request, response) {
+    let body = "";
+
+    request.on("data", chunk => (body += chunk));
+    request.on("end", () => {
+        let data;
+        try {
+            data = JSON.parse(body);
+        } catch {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "Invalid JSON" }));
+        }
+
+        const group = data.group;
+        const nick = data.nick;
+        const password = data.password;
+        const size = data.size;
+
+        const users = JSON.parse(fs.readFileSync(USERS_FILE, "utf8"));
+
+        if (group == null) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "group is undefined" }));
+        }
+
+        if (!isInteger(group)) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "invalid group" }));
+        }
+
+        if (nick == null) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "nick is undefined" }));
+        } 
+
+        if (!isString(nick)) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "nick is not a valid string" }));
+        }
+
+        if (password == null) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "password is undefined" }));
+        }
+
+        if (!isString(password)) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "password is not a valid string" }));
+        }
+        
+        if (size == null) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "size is undefined" }));
+        }
+
+        if (!isInteger(size) || size % 2 == 0) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "invalid size" }));
+        }
+        
+        if (!users[nick]) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "User is not registered" }));
+        }
+
+        if (users[nick] != hashPassword(password)) {
+            response.statusCode = 401;
+            return response.end(JSON.stringify({ error: "User registered with a different password" }));
+        }
+
+        let key = group + ":" + size;
+        let gameID;
+
+        if (!pendingGamesMap.has(key)) {
+            let newPendingGame = new Game(group, size, nick);
+            gameID = newPendingGame.gameID;
+            pendingGamesMap.set(key, newPendingGame); 
+            console.log("Creating game and adding to pending list: " + JSON.stringify(newPendingGame))
+        } else {
+            let game = pendingGamesMap.get(key);
+            gameID = game.gameID;
+            game.player2Nick = nick;
+            console.log("Matching game found: " + JSON.stringify(game));
+            // Initialize game board for /update
+            onGoingGamesMap.set(gameID, game);
+            pendingGamesMap.delete(key);
+        }
+
+        return response.end(JSON.stringify({ game: gameID }));
+    });
+}
+
+function handleLeave(request, response) {
+    let body = "";
+
+    request.on("data", chunk => (body += chunk));
+    request.on("end", () => {
+        let data;
+        try {
+            data = JSON.parse(body);
+        } catch {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "Invalid JSON" }));
+        }
+        const nick = data.nick;
+        const password = data.password;
+        const game = data.game;  
+
+        const users = JSON.parse(fs.readFileSync(USERS_FILE, "utf8"));
+
+        if (nick == null) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "nick is undefined" }));
+        } 
+
+        if (!isString(nick)) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "nick is not a valid string" }));
+        }
+
+        if (password == null) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "password is undefined" }));
+        }
+
+        if (!isString(password)) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "password is not a valid string" }));
+        }
+
+        if (game == null) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "game is undefined" }));
+        }
+
+        if (!isString(game)) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "game is not a valid string" }));
+        }
+
+        if (!users[nick]) {
+            response.statusCode = 400;
+            return response.end(JSON.stringify({ error: "User is not registered" }));
+        }
+
+        if (users[nick] != hashPassword(password)) {
+            response.statusCode = 401;
+            return response.end(JSON.stringify({ error: "User registered with a different password" }));
+        }
+
+        console.log("Pending Queue: " + pendingGamesMap.size);
+        console.log("OnGoing Games: " + onGoingGamesMap.size);
+
+        if (onGoingGamesMap.has(game)) {
+            let onGoingGame = onGoingGamesMap.get(game);
+            onGoingGame.winner = nick == onGoingGame.player1Nick ? onGoingGame.player2Nick : onGoingGame.player1Nick;
+            onGoingGamesMap.delete(game);
+            console.log("The Game was ongoing and the user: " + nick + " has forfeit. Winner is " + onGoingGame.winner);
+            // /update needs to send winner: onGoingGame.winner
+            return response.end(JSON.stringify({}));
+        }
+
+        for (const key of pendingGamesMap.keys()) {
+            let pendingGame = pendingGamesMap.get(key);
+
+            if (pendingGame.player1Nick == nick) {
+                pendingGamesMap.delete(key);
+                pendingGame.winner = null;
+                console.log("The user: " + nick + " has left the queue. Winner is " + pendingGame.winner);
+                // /update needs to send winner: null
+                return response.end(JSON.stringify({}));
+            }
+        }       
+
+        response.statusCode = 400;
+        return response.end(JSON.stringify({ error: "Invalid Game: " + game }));
+    });
+}
+
 
 function isString(v) {
   return typeof v === "string" || v instanceof String;
