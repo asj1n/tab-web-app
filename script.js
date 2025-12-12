@@ -14,7 +14,7 @@ let pieceWith2AlternativesId = null;
 let numbersToggled = false;
 
 
-const server = "http://localhost:8140";
+let server = "http://localhost:8140";
 
 const usernameField = document.getElementById("usernameInput");
 const passwordField = document.getElementById("passwordInput");
@@ -935,6 +935,7 @@ function saveSettings() {
     boardColumns = parseInt(document.getElementById("columnSelector").value);
     opponent = document.querySelector('input[name = "vs"]:checked').value;
     whoRollsDiceFirst = document.querySelector('input[name = "whoFirst"]:checked').value;
+    server = document.querySelector('input[name = "serverChoice"]:checked').value;
     document.getElementById("currentOpponentDisplay").textContent = "Opponent: " + opponent;
 
     clearMessages();
