@@ -49,8 +49,8 @@ class Game {
         this.pieceAlternatives = null;
         this.gameID = this.generateGameID();
         this.players = {
-            player1Nick: "Blue",
-            player2Nick: "Red"
+            [this.player1Nick]: "Blue",
+            [this.player2Nick]: "Red"
         }
     }
 
@@ -78,8 +78,6 @@ class Game {
     }
     
     getRedValidPiecesToMove() {
-        // retorna uma lista de peças do jogador vermelho que podem ser movidas com base no estado
-        // do jogo e no valor do latestDiceValue
         let redPiecesOnBoardMap = this.getRedPiecesOnBoard();
         let redValidPiecesToMoveMap = new Map();
 
@@ -103,11 +101,7 @@ class Game {
         let targetRow = Math.floor(targetPosition / boardColumns) + 1;
 
         let currentPlayer = this.players[this.turn];
-        //console.log("GetRedTargetPositions: " + currentPlayer);
 
-        // uma peça que esteja na última fila (4a do POV do AI, 1a fila do POV do utilizador) 
-        // só pode ser movida se o AI não tiver peças suas (da mesma cor) na fila inicial (1a fila do POV 
-        // do AI 4a do POV do utilizador) 
         if (currentRow == 1) {
             for (let i = 3 * boardColumns; i < 4 * boardColumns; i++) {
                 if (this.pieces[i]?.colour == "Red") {
@@ -116,28 +110,18 @@ class Game {
             }
         }
 
-        // se a linha em que a peça está coincidir com a fila na qual poderá calhar se o AI a jogar (não tem que mudar/saltar filas)
         if (currentRow == targetRow) { 
-            // verificamos se essa posição não está ocupada por uma peça do próprio AI
-            // e verificamos o estado da peça (não pode mover-se se o estado é "neverMoved" e o valor do dado for diferente de 1)
             if (this.pieces[targetPosition] == null || this.pieces[targetPosition].color != currentPlayer) {
                 if (piece.inMotion == false && this.latestDiceValue == 1 || (piece.inMotion == true)) {
                     targetPositions.push(targetPosition);
                 }
             }
-        // caso contrário, a linha da peça não coincide com a fila na qual poderá calhar (tem que mudar / saltar de fila)
         } else { 
-            // se a fila em que a peça se encontra for diferente de 1 (1a fila / incial do POV do utilizador
-            // 4a / última fila do POV do AI), a peça tem a oportunidade de saltar para a fila de cima (para
-            // baixo do POV do utilzador).
             if (currentRow != 1) {
                 let rowEndPosition = (currentRow) * boardColumns - 1;
                 let stepsToReachRowEnd = rowEndPosition - pieceIndex;
                 let secondTargetPosition = rowEndPosition - (2 * boardColumns - 1) + (this.latestDiceValue - (stepsToReachRowEnd + 1)); 
                 
-                // verificamos se essa posição não está ocupada por uma peça do próprio utilizador
-                // e verificamos o estado da peça (não pode mover-se se o estado é "neverMoved" e o valor do dado for diferente de 1 ou
-                // se o seu estado é "hasBeenInFourthRow" e a peça está na 3a fila (do POV do utilizador))
                 if (this.pieces[secondTargetPosition] == null || this.pieces[secondTargetPosition].color != currentPlayer) {
                     if (!(piece.reachedLastRow == true && currentRow == 2)) {
                         if (piece.inMotion == false && this.latestDiceValue == 1 || (piece.inMotion == true)) {
@@ -147,11 +131,7 @@ class Game {
                 }
             }
 
-            // se a fila em que a peça se encontra for menor do que 3 do POV do utilizador (1a e 2a do POV do AI), 
-            // a peça tem oportunidade de saltar para a fila de baixo do POV do AI (cima do POV do utilizador)
             if (currentRow < 3) {
-
-                // verificamos se essa posição não está ocupada por uma peça do próprio utilizador
                 if (this.pieces[targetPosition] == null || this.pieces[targetPosition].color != currentPlayer) {
                     targetPositions.push(targetPosition);
                 }
@@ -175,8 +155,6 @@ class Game {
     }
 
     getBlueValidPiecesToMove() {
-        // retorna uma lista de peças do jogador azul que podem ser movidas com base no estado
-        // do jogo e no valor do latestDiceValue 
         let bluePiecesOnBoardMap = this.getBluePiecesOnBoard();
         let blueValidPiecesToMoveMap = new Map();
 
@@ -193,7 +171,6 @@ class Game {
     }
 
     getBluePieceTargetPositions(pieceIndex, piece) {
-
         let boardColumns = this.size;
         let targetPositions = [];
         let currentRow = Math.floor(pieceIndex / boardColumns) + 1;
@@ -201,10 +178,8 @@ class Game {
         let targetRow = Math.floor(targetPosition / boardColumns) + 1;
 
         let currentPlayer = this.players[this.turn];
-        console.log("GetBlueTargetPositions: " + currentPlayer);
-
-        // uma peça que esteja na última fila (4a fila do POV do utilizador) só pode ser movida se
-        // o utilizador não tiver peças suas (da mesma cor) na fila inicial (1a fila do POV do utilizador) 
+        // console.log("GetBlueTargetPositions: " + currentPlayer);
+ 
         if (currentRow == 4) {
             for (let i = 0; i < boardColumns; i++) {
                 if (this.pieces[i]?.color == "Blue") {
@@ -213,36 +188,24 @@ class Game {
             }
         }
 
-        // se a linha em que a peça está coincidir com a fila na qual poderá calhar se o utilizador a jogar (não tem que mudar/saltar filas)
         if (currentRow == targetRow) {
-            // verificamos se essa posição não está ocupada por uma peça do próprio utilizador
-            // e verificamos o estado da peça (não pode mover-se se o estado é "neverMoved" e o valor do dado for diferente de 1)
             if (this.pieces[targetPosition] == null || this.pieces[targetPosition].color != currentPlayer) {
                 if ((piece.inMotion == false && this.latestDiceValue == 1) || piece.inMotion == true) {
                     targetPositions.push(targetPosition);
                 }
             }
-        // caso contrário, a linha da peça não coincide com a fila na qual poderá calhar (tem que mudar / saltar de fila)
         } else { 
-            // se a fila em que a peça se encontra for maior que 2 (fila 3 ou 4) do POV do utilizador, 
-            // a peça tem oportunidade de saltar para a fila de baixo
             if (currentRow > 2) { 
                 let rowEndPosition = (currentRow) * boardColumns - 1;
                 let stepsToReachRowEnd = rowEndPosition - pieceIndex;
                 let secondTargetPosition = rowEndPosition - (2 * boardColumns - 1) + (this.latestDiceValue - (stepsToReachRowEnd + 1)); 
                 
-                // verificamos se essa posição não está ocupada por uma peça do próprio utilizador
                 if (this.pieces[secondTargetPosition] == null || this.pieces[secondTargetPosition].color != currentPlayer) {
                     targetPositions.push(secondTargetPosition);
                 }
             }
 
-            // se a fila em que a peça se encontra for diferente de 4 (última fila do POV do utilizador),
-            // a peça tem a oportunidade de saltar para a fila de cima.
             if (currentRow != 4) {
-                // verificamos se essa posição não está ocupada por uma peça do próprio utilizador
-                // e verificamos o estado da peça (não pode mover-se se o estado é "neverMoved" e o valor do dado for diferente de 1 ou
-                // se o seu estado é "hasBeenInFourthRow" e a peça está na 3a fila (do POV do utilizador))
                 if (this.pieces[targetPosition] == null || this.pieces[targetPosition].color != currentPlayer) {
                     if (!(piece.reachedLastRow == true && currentRow == 3)) {
                         if (piece.inMotion == true || (piece.inMotion == false && this.latestDiceValue == 1)) {
@@ -284,10 +247,10 @@ class Game {
     updateRemainingPieces(piece) {
         if (piece != null) {
             if (piece.color == "Blue") {
-                console.log("Blue has lost a piece!");
+                // console.log("Blue has lost a piece!");
                 this.bluePiecesLeft--;
             } else {
-                console.log("Red has lost a piece!");
+                // console.log("Red has lost a piece!");
                 this.redPiecesLeft--;
             }
         }
@@ -371,11 +334,11 @@ const server = http.createServer((request, response) => {
         if (!gameClients[gameId]) gameClients[gameId] = [];
         gameClients[gameId].push(response);
 
-        console.log(`\nSSE connected: ${nick} in game ${gameId}`);
+        // console.log(`\nSSE connected: ${nick} in game ${gameId}`);
 
         // When the client disconnects
         request.on("close", () => {
-            console.log(`\nSSE disconnected: ${nick} from game ${gameId}`);
+            // console.log(`\nSSE disconnected: ${nick} from game ${gameId}`);
 
             const clients = gameClients[gameId];
             if (!clients) return; // Game might already be deleted
@@ -386,7 +349,7 @@ const server = http.createServer((request, response) => {
             // If no clients left, delete the game entry
             if (gameClients[gameId].length === 0) {
                 delete gameClients[gameId];
-                console.log(`No more clients in game ${gameId}, removed SSE group`);
+                // console.log(`No more clients in game ${gameId}, removed SSE group`);
             }
         });
 
@@ -487,7 +450,7 @@ function handleRegister(request, response) {
             }
         } else {
             // Save new user
-            console.log("New User: " + nick + ": " + password);
+            // console.log("New User: " + nick + ": " + password);
             users[nick] = hashedPassword;
             fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
         }
@@ -539,7 +502,7 @@ function handleRanking(request, response) {
         const rankingArray = (rankings[group] && rankings[group][size]) ? rankings[group][size] : [];
 
         // Respond with desired format
-        console.log("\nSending /rankings response")
+        // console.log("\nSending /rankings response", rankingArray)
         response.end(JSON.stringify({ ranking: rankingArray }));
     });
 }
@@ -621,14 +584,14 @@ function handleJoin(request, response) {
             let newPendingGame = new Game(group, size, nick);
             gameID = newPendingGame.gameID;
             pendingGamesMap.set(key, newPendingGame); 
-            console.log("\nCreating game and adding to pending list: " + JSON.stringify(newPendingGame))
+            // console.log("\nCreating game and adding to pending list: " + JSON.stringify(newPendingGame))
         } else {
             let game = pendingGamesMap.get(key);
             gameID = game.gameID;
 
             if (game.player1Nick != nick) {
                 game.player2Nick = nick;
-                console.log("\nMatched Game: " + JSON.stringify(game));
+                // console.log("\nMatched Game: " + JSON.stringify(game));
                 onGoingGamesMap.set(gameID, game);
                 pendingGamesMap.delete(key);
                 // Start game board and send first /update
@@ -701,14 +664,14 @@ function handleLeave(request, response) {
             return response.end(JSON.stringify({ error: "User registered with a different password" }));
         }
 
-        console.log("Pending Queue: " + pendingGamesMap.size);
-        console.log("OnGoing Games: " + onGoingGamesMap.size);
+        // console.log("Pending Queue: " + pendingGamesMap.size);
+        // console.log("OnGoing Games: " + onGoingGamesMap.size);
 
         if (onGoingGamesMap.has(game)) {
             let onGoingGame = onGoingGamesMap.get(game);
             onGoingGame.winner = nick == onGoingGame.player1Nick ? onGoingGame.player2Nick : onGoingGame.player1Nick;
             onGoingGamesMap.delete(game);
-            console.log("The Game was ongoing and the user: " + nick + " has forfeit. Winner is " + onGoingGame.winner);
+            // console.log("The Game was ongoing and the user: " + nick + " has forfeit. Winner is " + onGoingGame.winner);
             // Finish game and /update needs to send winner: onGoingGame.winner
             endGame(onGoingGame);
 
@@ -721,7 +684,7 @@ function handleLeave(request, response) {
             if (pendingGame.player1Nick == nick && pendingGame.gameID == game) {
                 pendingGamesMap.delete(key);
                 pendingGame.winner = null;
-                console.log("The user: " + nick + " has left the queue. Winner is " + pendingGame.winner);
+                // console.log("The user: " + nick + " has left the queue. Winner is " + pendingGame.winner);
                 // Finish game and /update needs to send winner: null
                 endGame(pendingGame);
 
@@ -1011,8 +974,7 @@ function hashPassword(password) {
 }
 
 function startGame(game) {
-    console.log("Initializing GameID: " + game.gameID);
-
+    // console.log("Initializing GameID: " + game.gameID);
     let size = game.size;
     
     for (let i = 0; i < 4 * size; i++) {
@@ -1041,11 +1003,11 @@ function startGame(game) {
         turn: game.turn
     })
 
-    console.log("\nSending startGame update message for GameID: " + game.gameID);
+    // console.log("\nSending startGame update message for GameID: " + game.gameID);
     
     setTimeout(() => {
         sendUpdateMessage(game.gameID, message);
-    }, 2000)
+    }, 1000)
 }
 
 function endGame(game) {
@@ -1058,7 +1020,7 @@ function endGame(game) {
         updateRankings(game);
     }
 
-    console.log("\nSending endGame update message for GameID: " + game.gameID);
+    // console.log("\nSending endGame update message for GameID: " + game.gameID);
     sendUpdateMessage(game.gameID, message);
 }
 
@@ -1102,7 +1064,7 @@ function rollDice(game) {
 
     game.latestDiceValue = totalValue;
 
-    console.log("\nSending rollDice update message for GameID: " + game.gameID);
+    // console.log("\nSending rollDice update message for GameID: " + game.gameID);
     sendUpdateMessage(game.gameID, message);
 }
 
@@ -1116,12 +1078,10 @@ function updateRankings(game) {
 
     const rankings = JSON.parse(fs.readFileSync(RANKINGS_FILE, "utf8"));
 
-    // 1. Ensure group exists
     if (!rankings[group]) {
         rankings[group] = {};
     }
 
-    // 2. Ensure size exists
     if (!rankings[group][size]) {
         rankings[group][size] = [];
     }
@@ -1129,32 +1089,32 @@ function updateRankings(game) {
     const list = rankings[group][size];
   
     // ---- Update player 1 ----
-    let p1 = list.find(p => p.nick === player1Nick);
+    let player1 = list.find(p => p.nick === player1Nick);
 
-    if (!p1) {
-        p1 = { nick: player1Nick, victories: 0, games: 0 };
-        list.push(p1);
+    if (!player1) {
+        player1 = { nick: player1Nick, victories: 0, games: 0 };
+        list.push(player1);
     }
 
-    p1.games++;
+    player1.games++;
     if (player1Nick === winner) {
-        p1.victories++;
+        player1.victories++;
     }
 
     // ---- Update player 2 ----
-    let p2 = list.find(p => p.nick === player2Nick);
+    let player2 = list.find(p => p.nick === player2Nick);
 
-    if (!p2) {
-        p2 = { nick: player2Nick, victories: 0, games: 0 };
-        list.push(p2);
+    if (!player2) {
+        player2 = { nick: player2Nick, victories: 0, games: 0 };
+        list.push(player2);
     }
 
-    p2.games++;
+    player2.games++;
     if (player2Nick === winner) {
-        p2.victories++;
+        player2.victories++;
     }
 
-    console.log("\nUpdating Rankings after conclusion of GameID: " + game.gameID);
+    // console.log("\nUpdating Rankings after conclusion of GameID: " + game.gameID);
     fs.writeFileSync(RANKINGS_FILE, JSON.stringify(rankings, null, 2), "utf8");
 }
 
@@ -1166,37 +1126,37 @@ function makeMove(game, chosenCellIndex) {
     if (game.pieceIdWithTwoAlternatives != null) { // Previous notify had two choices
         let from = game.pieceIdWithTwoAlternatives;
         if (!game.pieceAlternatives.includes(chosenCellIndex)) { // Invalid choice
-            console.log("\nChosen alternative is invalid: " + chosenCellIndex)
+            // console.log("\nChosen alternative is invalid: " + chosenCellIndex)
             sendUpdateInvalidChoiceError(game);
         } else { // Valid Choice
-            console.log("\nValid Chosen alternative! Will move piece: " + from + " to " + chosenCellIndex);
+            // console.log("\nValid Chosen alternative! Will move piece: " + from + " to " + chosenCellIndex);
             game.movePiece(from, chosenCellIndex);
             game.pieceAlternatives = null;
             game.pieceIdWithTwoAlternatives = null;
             selectedPieces = [from, chosenCellIndex];
         }
     } 
-    else { // No previous choices."Regular" move
+    else { // "Regular" move (1 option only)
         let piece = game.pieces[chosenCellIndex];
 
         if (piece == null) {
-            console.log("Selected a null piece")
+            // console.log("Selected a null piece")
             return;
         }
 
         let cellTargetPositions = [];
         if (game.turn == game.player1Nick) {
-            console.log("\nFetching Blue target positions for piece: " + chosenCellIndex)
+            // console.log("\nFetching Blue target positions for piece: " + chosenCellIndex)
             cellTargetPositions = game.getBluePieceTargetPositions(chosenCellIndex, piece)
         } else {
-            console.log("\nFetching Red target positions for piece: " + chosenCellIndex)
+            // console.log("\nFetching Red target positions for piece: " + chosenCellIndex)
             cellTargetPositions = game.getRedPieceTargetPositions(chosenCellIndex, piece)
         } 
         
-        console.log("Target Positions found: " + cellTargetPositions);
+        // console.log("Target Positions found: " + cellTargetPositions);
 
         if (cellTargetPositions.length == 2) {
-            console.log("\n>>> Need to send step: to message")
+            // console.log("\n>>> Need to send step: to message")
             sendUpdateWithTwoAlternatives(game, chosenCellIndex, cellTargetPositions);
             return;
         }
@@ -1214,10 +1174,10 @@ function makeMove(game, chosenCellIndex) {
         game.changeTurn();
     }
 
-    game.players = {
-        [game.player1Nick]: "Blue",
-        [game.player2Nick]: "Red"
-    }
+    // game.players = {
+    //     [game.player1Nick]: "Blue",
+    //     [game.player2Nick]: "Red"
+    // }
 
     let message = new Message({
         cell: chosenCellIndex,
@@ -1233,7 +1193,7 @@ function makeMove(game, chosenCellIndex) {
     sendUpdateMessage(game.gameID, message);
 
     if (game.isGameFinished()) {
-        console.log("\nMove has concluded the game");
+        // console.log("\nMove has concluded the game");
         game.winner = currentPlayer;
         endGame(game);
     }
@@ -1249,10 +1209,10 @@ function passTurn(game) {
         validMoves = game.getRedValidPiecesToMove();
     }
 
-    console.log("\nTrying to pass turn. Valid pieces to move: " + [...validMoves]);
+    // console.log("\nTrying to pass turn. Valid pieces to move: " + [...validMoves]);
 
     if (validMoves.length == 0) {
-        console.log("\nCant pass turn, player has moves available.");
+        // console.log("\nCant pass turn, player has moves available.");
         return;
     }
 
@@ -1267,15 +1227,15 @@ function passTurn(game) {
         turn: game.turn
     })
 
-    console.log("\nPassing turn from " + currentTurn + " to " + game.turn);
+    // console.log("\nPassing turn from " + currentTurn + " to " + game.turn);
     sendUpdateMessage(game.gameID, message);
 }
 
 function sendUpdateWithTwoAlternatives(game, cellIndex, cellAlternatives) {
-     game.players = {
-        [game.player1Nick]: "Blue",
-        [game.player2Nick]: "Red"
-    }
+    //  game.players = {
+    //     [game.player1Nick]: "Blue",
+    //     [game.player2Nick]: "Red"
+    // }
     
     let message = new Message({
         cell: cellIndex,
