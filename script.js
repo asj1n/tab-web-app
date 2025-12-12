@@ -14,7 +14,7 @@ let pieceWith2AlternativesId = null;
 let numbersToggled = false;
 
 
-const server = "";
+let server = "http://localhost:8140";
 
 const usernameField = document.getElementById("usernameInput");
 const passwordField = document.getElementById("passwordInput");
@@ -31,7 +31,7 @@ let redPlayerNick;
 let gameID;
 let gameIsSetUp = false;
 
-let storageHasToBeUpdated = false;
+let storageHasToBeUpdated = true;
 
 
 class Piece {
@@ -932,9 +932,10 @@ function passTurn() {
 }
 
 function saveSettings() {
-    boardColumns = document.getElementById("columnSelector").value;
+    boardColumns = parseInt(document.getElementById("columnSelector").value);
     opponent = document.querySelector('input[name = "vs"]:checked').value;
     whoRollsDiceFirst = document.querySelector('input[name = "whoFirst"]:checked').value;
+    server = document.querySelector('input[name = "serverChoice"]:checked').value;
     document.getElementById("currentOpponentDisplay").textContent = "Opponent: " + opponent;
 
     clearMessages();
@@ -1428,7 +1429,6 @@ async function renderRankings() {
     rankingRows.innerHTML = "";
 
     if (opponent == "Player2") {
-
         if (localStorage.length == 0 || storageHasToBeUpdated) {
             const json = await serverRanking(boardColumns);
             console.log("Fetching Server Rankings: ", json);
