@@ -303,10 +303,7 @@ window.addEventListener("load", () => {
         document.getElementById(id).addEventListener("click", callbacks[id]);
     }
 
-    // console.log(game);
-    // console.log("Playing against: " + opponent);
-    // console.log("Rolls dice first: " + whoRollsDiceFirst);
-    document.getElementById("currentOpponentDisplay").textContent = "Playing Against: " + opponent;
+    document.getElementById("currentOpponentDisplay").textContent = "Opponent: " + opponent;
     currentVisibleScreen.style.display = "flex";
     disableRollDiceButton();
 });
@@ -640,6 +637,7 @@ function getBluePieceTargetPositions(piece) {
 }
 
 function aiMove() {
+    showWaitingForOpponentDisplay();
     disableRollDiceButton();
     disableForfeitButton();
     disablePassTurnButton();
@@ -668,6 +666,7 @@ function aiMove() {
                     enableRollDiceButton();
                     enableForfeitButton();
                     disablePassTurnButton();
+                    hideWaitingForOpponentDisplay();
                 }
             }, 2000);
 
@@ -702,6 +701,7 @@ function aiMove() {
                 enableRollDiceButton();
                 enableForfeitButton();
                 disablePassTurnButton();
+                hideWaitingForOpponentDisplay();
             }
         }, 2000);
     }, 2000);
@@ -935,7 +935,7 @@ function saveSettings() {
     boardColumns = document.getElementById("columnSelector").value;
     opponent = document.querySelector('input[name = "vs"]:checked').value;
     whoRollsDiceFirst = document.querySelector('input[name = "whoFirst"]:checked').value;
-    document.getElementById("currentOpponentDisplay").textContent = "Playing Against: " + opponent;
+    document.getElementById("currentOpponentDisplay").textContent = "Opponent: " + opponent;
 
     clearMessages();
     storageHasToBeUpdated = true;
@@ -1073,6 +1073,7 @@ function setUpGame(players, turn) {
     enableForfeitButton();
 
     if (turn == nick) {
+        hideWaitingForOpponentDisplay();
         enableRollDiceButton();
     } else {
         disableRollDiceButton();
@@ -1083,7 +1084,7 @@ function setUpGame(players, turn) {
     game = new Game();
     
     clearMessages();
-    document.getElementById("currentOpponentDisplay").textContent = "Playing Against: " + opponentNick;
+    document.getElementById("currentOpponentDisplay").textContent = "Opponent: " + opponentNick;
     addNewMessage("Opponent found: " + opponentNick, "yellow")
     addNewMessage("Connection established!", "yellow");
     addNewMessage("Hello " + nick + "! You will play as " + getPlayerColor(nick), getPlayerColor(nick));
@@ -1099,12 +1100,13 @@ function resetGame() {
     gameIsSetUp = false;
     latestDiceValue = 0;
     resetDice();
+    hideWaitingForOpponentDisplay();
     disablePassTurnButton();
     disableRollDiceButton();
     enableSaveSettingsButton();
     enableRegisterButton();
     showStartGameButton();
-    document.getElementById("currentOpponentDisplay").textContent = "Playing Against: " + opponent;
+    document.getElementById("currentOpponentDisplay").textContent = "Opponent: " + opponent;
 }
 
 function handleServerRollDice(stickValues, value, keepPlaying) {
@@ -1156,8 +1158,10 @@ function handleServerPassTurn(turn) {
 
     if (currentPlayer != getPlayerColor(nick)) {
         disableRollDiceButton();
+        showWaitingForOpponentDisplay();
     } else {
         enableRollDiceButton();
+        hideWaitingForOpponentDisplay();
     }
 }
 
@@ -1261,6 +1265,7 @@ async function serverJoin() {
         if (response.ok) {
             gameID = json.game;
             console.log("Joining:\n • Nick: " + nick + "\n • Password: " + password + "\n • ", json);
+            showWaitingForOpponentDisplay();
             serverUpdate();
         } else {
             console.log("Joining response not OK:", json);
@@ -1459,3 +1464,58 @@ function addRankRow(nick, wins, totalGames) {
     return p;
 }
 
+
+const canvas = document.getElementById("loadSpinner");
+const ctx = canvas.getContext("2d");
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 2;
+const radius = 17;
+const lineWidth = 5;
+const segments = 12;
+let angle = 0;
+let spinnerAnimating = false;
+
+
+function drawLoadSpinner() {
+    if (!spinnerAnimating) return; // stop if not animating
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < segments; i++) {
+        const alpha = 2 * Math.PI / segments;
+        const startingAngleForSegment = alpha * i;
+        const opacity = i / segments;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, startingAngleForSegment + angle, startingAngleForSegment + angle + Math.PI / 12);
+        ctx.strokeStyle = `rgb(247, 154, 58, ${opacity})`;
+        ctx.lineWidth = lineWidth;
+        ctx.stroke();
+    }
+
+    angle += 0.05;
+    requestAnimationFrame(drawLoadSpinner);
+}
+
+function showLoadSpinner() {
+    canvas.style.display = "flex";
+    if (!spinnerAnimating) {
+        spinnerAnimating = true;
+        drawLoadSpinner();
+    }
+}
+
+function hideLoadSpinner() {
+    spinnerAnimating = false;
+    canvas.style.display = "none";
+}
+
+function showWaitingForOpponentDisplay() {
+    const waitingForOpponentDisplay = document.getElementById("waitingForOpponentDisplay");
+    waitingForOpponentDisplay.style.display = "flex";
+    showLoadSpinner();
+}
+
+function hideWaitingForOpponentDisplay() {
+    const waitingForOpponentDisplay = document.getElementById("waitingForOpponentDisplay");
+    waitingForOpponentDisplay.style.display = "none";
+    hideLoadSpinner();
+}
